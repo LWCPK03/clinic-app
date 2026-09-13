@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlueCare Clinic OS</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e40af">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col font-sans">
+
+  <!-- ================= AUTH / LOGIN MODAL ================= -->
+  <div id="authScreen" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white max-w-md w-full rounded-2xl shadow-2xl border border-slate-100 p-8">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-brand-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-brand-200">
+          <i data-lucide="shield-plus" class="w-7 h-7"></i>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Clinic Portal</h2>
+          <p class="text-xs text-slate-500">Sign in to your account</p>
+        </div>
+      </div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Username</label>
+          <input type="text" id="loginUsername" required placeholder="admin or drkhan" 
+            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Password</label>
+          <input type="password" id="loginPassword" required placeholder="••••••••" 
+            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+        </div>
+        <button type="submit" id="loginBtn" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-md shadow-brand-200 flex items-center justify-center gap-2 transition cursor-pointer">
+          <span>Sign In</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+        <div class="p-3 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-800 space-y-1">
+          <p class="font-bold">Default Credentials:</p>
+          <p>• Admin: <span class="font-mono font-bold">admin</span> / <span class="font-mono">admin123</span></p>
+          <p>• Doctor: <span class="font-mono font-bold">drkhan</span> / <span class="font-mono">123456</span></p>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= TOP NAVIGATION BAR ================= -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div id="clinicLogoSlot" class="w-10 h-10 bg-brand-50 border border-brand-100 rounded-xl flex items-center justify-center overflow-hidden">
+          <i data-lucide="activity" class="w-6 h-6 text-brand-600" id="defaultLogoIcon"></i>
+          <img id="customLogoImg" class="w-full h-full object-contain hidden" alt="Logo" />
+        </div>
+        <div>
+          <h1 id="topClinicName" class="font-bold text-lg text-slate-900 leading-tight">Clinic Portal</h1>
+          <span id="roleBadge" class="text-[11px] font-semibold text-brand-600 uppercase tracking-wider bg-brand-50 px-2 py-0.5 rounded-md">Doctor View</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <!-- Admin/Doctor View Switcher -->
+        <div id="adminNavTabs" class="hidden items-center bg-slate-100 p-1 rounded-xl text-xs font-semibold">
+          <button onclick="switchView('doctor')" id="btnTabDoctor" class="px-3 py-1.5 rounded-lg bg-white shadow-xs text-slate-900">Doctor Panel</button>
+          <button onclick="switchView('admin')" id="btnTabAdmin" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900">Admin Panel</button>
+        </div>
+
+        <button onclick="logout()" title="Logout" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition">
+          <i data-lucide="log-out" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= DOCTOR PANEL ================= -->
+  <div id="doctorPanel" class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full flex flex-col gap-6">
+
+    <!-- Analytics Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Today's Visits</span>
+        <div class="flex items-baseline justify-between mt-1">
+          <span id="statTodayVisits" class="text-2xl font-black text-brand-600">0</span>
+          <i data-lucide="users" class="w-5 h-5 text-brand-200"></i>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Monthly Visits</span>
+        <div class="flex items-baseline justify-between mt-1">
+          <span id="statMonthVisits" class="text-2xl font-black text-slate-800">0</span>
+          <i data-lucide="calendar" class="w-5 h-5 text-slate-300"></i>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Today's Fee</span>
+        <div class="flex items-baseline justify-between mt-1">
+          <span id="statTodayFee" class="text-2xl font-black text-emerald-600">₨ 0</span>
+          <i data-lucide="wallet" class="w-5 h-5 text-emerald-200"></i>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Monthly Fee</span>
+        <div class="flex items-baseline justify-between mt-1">
+          <span id="statMonthFee" class="text-2xl font-black text-slate-800">₨ 0</span>
+          <i data-lucide="banknote" class="w-5 h-5 text-slate-300"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Patient Search Bar -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-3 shadow-xs flex items-center gap-3">
+      <i data-lucide="search" class="w-5 h-5 text-slate-400 ml-2"></i>
+      <input type="text" id="patientSearchInput" oninput="handleSearch()" placeholder="Search patient history by ID, Name, or CNIC..." 
+        class="w-full bg-transparent text-sm focus:outline-none placeholder-slate-400">
+      <button onclick="clearSearch()" class="text-xs text-slate-400 hover:text-slate-600 px-2 font-medium">Clear</button>
+    </div>
+
+    <!-- WORKFLOW GRID -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- LEFT: Entry Form (7 Cols) -->
+      <div class="lg:col-span-7">
+        <form id="clinicEntryForm" onsubmit="savePatientRecord(event)" class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-6">
+
+          <!-- Section 1: Demographics -->
+          <div>
+            <h3 class="text-sm font-bold text-brand-900 uppercase tracking-wider flex items-center gap-2 mb-3">
+              <i data-lucide="user" class="w-4 h-4 text-brand-600"></i> Basic Information
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Patient ID *</label>
+                <input type="text" id="pId" required placeholder="e.g. PAT-101" 
+                  class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none font-semibold text-brand-700">
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Full Name *</label>
+                <input type="text" id="pName" required placeholder="Patient Name" 
+                  class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Gender</label>
+                <select id="pGender" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Child">Child</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Age (Years) *</label>
+                <input type="number" id="pAge" required placeholder="32" 
+                  class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">CNIC / B-Form</label>
+                <input type="text" id="pCnic" placeholder="35201-xxxxxxx-x" 
+                  class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Contact Phone</label>
+                <input type="text" id="pPhone" placeholder="0300-xxxxxxx" 
+                  class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Residential Address</label>
+                <input type="text" id="pAddress" placeholder="Town, City" 
+                  class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Vitals -->
+          <div class="pt-4 border-t border-slate-100">
+            <h3 class="text-sm font-bold text-brand-900 uppercase tracking-wider flex items-center gap-2 mb-3">
+              <i data-lucide="heart-pulse" class="w-4 h-4 text-brand-600"></i> Vital Signs
+            </h3>
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase">BP (mmHg)</label>
+                <input type="text" id="vBp" placeholder="120/80" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase">Pulse (bpm)</label>
+                <input type="text" id="vPulse" placeholder="78" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase">Temp (°F)</label>
+                <input type="text" id="vTemp" placeholder="98.6" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase">Sugar (mg/dL)</label>
+                <input type="text" id="vSugar" placeholder="110 RBS" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase">Weight (kg)</label>
+                <input type="text" id="vWeight" placeholder="68" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Clinical Notes -->
+          <div class="pt-4 border-t border-slate-100">
+            <h3 class="text-sm font-bold text-brand-900 uppercase tracking-wider flex items-center gap-2 mb-3">
+              <i data-lucide="stethoscope" class="w-4 h-4 text-brand-600"></i> Clinical Notes
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Symptoms / Complaints</label>
+                <textarea id="cSymptoms" rows="2" placeholder="Fever since 2 days..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"></textarea>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Diagnosis</label>
+                <textarea id="cDiagnosis" rows="2" placeholder="Viral infection..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800"></textarea>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Known Allergies</label>
+                <input type="text" id="cAllergies" placeholder="Penicillin, Dust, None" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Medical / Surgical History</label>
+                <input type="text" id="cHistory" placeholder="Hypertension since 5 yrs..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4: Prescription & Drugs -->
+          <div class="pt-4 border-t border-slate-100">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-bold text-brand-900 uppercase tracking-wider flex items-center gap-2">
+                <i data-lucide="pill" class="w-4 h-4 text-brand-600"></i> Prescription & Medication
+              </h3>
+              <button type="button" onclick="addMedicineRow()" class="text-xs font-semibold text-brand-600 hover:text-brand-700 flex items-center gap-1">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add Drug
+              </button>
+            </div>
+            <div id="medicinesContainer" class="space-y-2">
+              <!-- JS Injected Row -->
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Required Lab Tests</label>
+                <input type="text" id="rxLabTests" placeholder="CBC, LFTs, Sugar Fasting" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Follow-up Date</label>
+                <input type="date" id="rxFollowUp" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 5: Financials -->
+          <div class="pt-4 border-t border-slate-100">
+            <h3 class="text-sm font-bold text-brand-900 uppercase tracking-wider flex items-center gap-2 mb-3">
+              <i data-lucide="receipt" class="w-4 h-4 text-brand-600"></i> Fee & Payment
+            </h3>
+            <div class="grid grid-cols-3 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Consultation Fee</label>
+                <input type="number" id="fFee" value="1000" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Discount</label>
+                <input type="number" id="fDiscount" value="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Method</label>
+                <select id="fMethod" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                  <option value="Cash">Cash</option>
+                  <option value="Online">Online / Card</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" id="savePatientBtn" 
+            class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-md shadow-brand-200 flex items-center justify-center gap-2 transition cursor-pointer">
+            <i data-lucide="cloud-upload" class="w-4 h-4"></i>
+            <span>Save & Generate Google Docs Rx</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- RIGHT: Patients Queue & Search (5 Cols) -->
+      <div class="lg:col-span-5 space-y-4">
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+          <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-3">
+            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+              <i data-lucide="history" class="w-4 h-4 text-brand-600"></i> Patient Directory
+            </h3>
+            <button onclick="loadInitialData()" class="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition" title="Refresh list">
+              <i data-lucide="refresh-cw" class="w-4 h-4" id="spinSync"></i>
+            </button>
+          </div>
+
+          <div id="patientListContainer" class="space-y-3 max-h-[750px] overflow-y-auto pr-1">
+            <p class="text-xs text-center py-10 text-slate-400">Loading directory from Google Sheets...</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= ADMIN PANEL ================= -->
+  <div id="adminPanel" class="max-w-4xl mx-auto px-4 py-8 flex-1 w-full hidden space-y-8">
+    
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+      <div class="flex items-center gap-2 mb-4 border-b border-slate-100 pb-3">
+        <i data-lucide="settings" class="w-5 h-5 text-brand-600"></i>
+        <h2 class="font-bold text-slate-800">Clinic Identity & Branding</h2>
+      </div>
+
+      <form id="settingsForm" onsubmit="saveClinicSettings(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Admin Email (Connected ID)</label>
+          <input type="email" id="admEmail" required placeholder="admin@gmail.com" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Clinic Name (Appears on Prescription)</label>
+          <input type="text" id="admClinicName" required placeholder="e.g. City Health Medical Complex" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Clinic Logo Image URL</label>
+          <input type="url" id="admLogoUrl" placeholder="https://example.com/logo.png" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+        </div>
+        <button type="submit" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold rounded-xl shadow-xs">
+          Save Settings
+        </button>
+      </form>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+      <div class="flex items-center gap-2 mb-4 border-b border-slate-100 pb-3">
+        <i data-lucide="user-check" class="w-5 h-5 text-brand-600"></i>
+        <h2 class="font-bold text-slate-800">Doctor Access Management</h2>
+      </div>
+
+      <form id="addDoctorForm" onsubmit="addDoctor(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+        <input type="text" id="docName" required placeholder="Dr. Full Name" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+        <input type="text" id="docUser" required placeholder="Username" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+        <input type="password" id="docPass" required placeholder="Password" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+        <button type="submit" class="sm:col-span-3 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs rounded-xl transition">
+          Create Doctor Credentials
+        </button>
+      </form>
+
+      <div class="border-t border-slate-100 pt-4">
+        <h4 class="text-xs font-bold uppercase text-slate-400 mb-2">Existing Registered Doctors</h4>
+        <div id="doctorList" class="space-y-2 text-xs">
+          <p class="text-slate-400">Loading accounts...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT ENGINE -->
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzMW6OIiPEaAmydSl-Owi1ehHFaSDmdRkSA_Fx3OYpZRoQmcTRBoDnbT34Mh8q0umy_UA/exec";
+
+    let currentUser = null;
+    let clinicSettings = {};
+    let allPatients = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+      addMedicineRow();
+
+      const savedUser = localStorage.getItem("clinicUser");
+      if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        activateUserSession();
+      }
+    });
+
+    function addMedicineRow() {
+      const container = document.getElementById("medicinesContainer");
+      const rowId = "med_" + Date.now();
+      const div = document.createElement("div");
+      div.id = rowId;
+      div.className = "grid grid-cols-12 gap-2 items-center";
+      div.innerHTML = `
+        <input type="text" placeholder="Drug name & dose (e.g. Tab Panadol 500mg)" class="col-span-5 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs med-name">
+        <input type="text" placeholder="1+0+1" class="col-span-3 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs med-freq">
+        <input type="text" placeholder="5 Days" class="col-span-3 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs med-dur">
+        <button type="button" onclick="document.getElementById('${rowId}').remove()" class="col-span-1 text-slate-400 hover:text-red-500 flex justify-center">
+          <i data-lucide="trash-2" class="w-4 h-4"></i>
+        </button>
+      `;
+      container.appendChild(div);
+      lucide.createIcons();
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const btn = document.getElementById("loginBtn");
+      btn.disabled = true;
+      btn.innerText = "Authenticating...";
+
+      const payload = {
+        action: "login",
+        username: document.getElementById("loginUsername").value.trim(),
+        password: document.getElementById("loginPassword").value.trim()
+      };
+
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+
+        if (result.status === "success") {
+          currentUser = result.user;
+          localStorage.setItem("clinicUser", JSON.stringify(currentUser));
+          activateUserSession();
+        } else {
+          alert(result.message || "Invalid credentials");
+        }
+      } catch (err) {
+        alert("Server unreachable. Please check connection.");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Sign In";
+      }
+    }
+
+    function activateUserSession() {
+      document.getElementById("authScreen").classList.add("hidden");
+      document.getElementById("roleBadge").innerText = `${currentUser.name} (${currentUser.role})`;
+      
+      if (currentUser.role === "Admin") {
+        document.getElementById("adminNavTabs").classList.remove("hidden");
+        document.getElementById("adminNavTabs").classList.add("flex");
+      }
+      loadInitialData();
+    }
+
+    function logout() {
+      localStorage.removeItem("clinicUser");
+      window.location.reload();
+    }
+
+    function switchView(view) {
+      const docP = document.getElementById("doctorPanel");
+      const admP = document.getElementById("adminPanel");
+      const bDoc = document.getElementById("btnTabDoctor");
+      const bAdm = document.getElementById("btnTabAdmin");
+
+      if (view === "admin") {
+        docP.classList.add("hidden");
+        admP.classList.remove("hidden");
+        bAdm.className = "px-3 py-1.5 rounded-lg bg-white shadow-xs text-slate-900";
+        bDoc.className = "px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900";
+        loadDoctorsList();
+      } else {
+        admP.classList.add("hidden");
+        docP.classList.remove("hidden");
+        bDoc.className = "px-3 py-1.5 rounded-lg bg-white shadow-xs text-slate-900";
+        bAdm.className = "px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900";
+      }
+    }
+
+    async function loadInitialData() {
+      const spinner = document.getElementById("spinSync");
+      spinner.classList.add("animate-spin");
+
+      try {
+        const sRes = await fetch(`${SCRIPT_URL}?action=getSettings`);
+        const sJson = await sRes.json();
+        if (sJson.status === "success") {
+          clinicSettings = sJson.data;
+          applySettings(clinicSettings);
+        }
+
+        const pRes = await fetch(`${SCRIPT_URL}?action=getPatients`);
+        const pJson = await pRes.json();
+        if (pJson.status === "success") {
+          allPatients = pJson.data;
+          renderPatients(allPatients);
+          calculateStats(allPatients);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        spinner.classList.remove("animate-spin");
+      }
+    }
+
+    function applySettings(cfg) {
+      if (cfg.clinicName) {
+        document.getElementById("topClinicName").innerText = cfg.clinicName;
+        document.getElementById("admClinicName").value = cfg.clinicName;
+      }
+      if (cfg.adminEmail) {
+        document.getElementById("admEmail").value = cfg.adminEmail;
+      }
+      if (cfg.logoUrl) {
+        document.getElementById("admLogoUrl").value = cfg.logoUrl;
+        const img = document.getElementById("customLogoImg");
+        img.src = cfg.logoUrl;
+        img.classList.remove("hidden");
+        document.getElementById("defaultLogoIcon").classList.add("hidden");
+      }
+    }
+
+    async function savePatientRecord(e) {
+      e.preventDefault();
+      const btn = document.getElementById("savePatientBtn");
+      btn.disabled = true;
+      btn.innerHTML = `<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span> Generating A4 Rx Doc...`;
+
+      const medRows = document.querySelectorAll("#medicinesContainer > div");
+      let medicines = [];
+      medRows.forEach(r => {
+        const name = r.querySelector(".med-name").value.trim();
+        const freq = r.querySelector(".med-freq").value.trim();
+        const dur = r.querySelector(".med-dur").value.trim();
+        if (name) medicines.push({ name, frequency: freq, duration: dur });
+      });
+
+      const payload = {
+        action: "savePatient",
+        doctorName: currentUser.name,
+        patientId: document.getElementById("pId").value.trim(),
+        name: document.getElementById("pName").value.trim(),
+        gender: document.getElementById("pGender").value,
+        age: document.getElementById("pAge").value.trim(),
+        cnic: document.getElementById("pCnic").value.trim(),
+        phone: document.getElementById("pPhone").value.trim(),
+        address: document.getElementById("pAddress").value.trim(),
+        bp: document.getElementById("vBp").value.trim(),
+        pulse: document.getElementById("vPulse").value.trim(),
+        temp: document.getElementById("vTemp").value.trim(),
+        sugar: document.getElementById("vSugar").value.trim(),
+        weight: document.getElementById("vWeight").value.trim(),
+        symptoms: document.getElementById("cSymptoms").value.trim(),
+        diagnosis: document.getElementById("cDiagnosis").value.trim(),
+        allergies: document.getElementById("cAllergies").value.trim(),
+        history: document.getElementById("cHistory").value.trim(),
+        medicines: medicines,
+        labTests: document.getElementById("rxLabTests").value.trim(),
+        followUpDate: document.getElementById("rxFollowUp").value,
+        fee: document.getElementById("fFee").value || "0",
+        discount: document.getElementById("fDiscount").value || "0",
+        paymentMethod: document.getElementById("fMethod").value
+      };
+
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+
+        if (result.status === "success") {
+          alert("Patient saved! Google Doc Prescription generated.");
+          if (result.docUrl) {
+            window.open(result.docUrl, "_blank");
+          }
+          document.getElementById("clinicEntryForm").reset();
+          loadInitialData();
+        }
+      } catch (err) {
+        alert("Failed to communicate with Google Drive.");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="cloud-upload" class="w-4 h-4"></i><span>Save & Generate Google Docs Rx</span>`;
+        lucide.createIcons();
+      }
+    }
+
+    function renderPatients(list) {
+      const c = document.getElementById("patientListContainer");
+      c.innerHTML = "";
+
+      if (list.length === 0) {
+        c.innerHTML = `<p class="text-xs text-center py-6 text-slate-400">No records found.</p>`;
+        return;
+      }
+
+      list.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "p-3 bg-slate-50 hover:bg-brand-50/50 border border-slate-200 rounded-xl transition cursor-pointer";
+        card.onclick = () => fillPatientToForm(p);
+        card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-xs font-black text-brand-700 font-mono">${p.PatientID || 'N/A'}</span>
+              <h4 class="text-sm font-bold text-slate-800">${p.Name || 'Unnamed'}</h4>
+              <p class="text-[11px] text-slate-500">${p.Age} Y • ${p.Gender} • ${p.Phone || 'No Phone'}</p>
+            </div>
+            ${p.DocURL ? `<a href="${p.DocURL}" target="_blank" onclick="event.stopPropagation()" class="p-1 text-brand-600 hover:text-brand-800" title="Open Google Doc Rx"><i data-lucide="file-text" class="w-4 h-4"></i></a>` : ''}
+          </div>
+          <div class="mt-2 pt-2 border-t border-slate-200/60 flex justify-between items-center text-[10px] text-slate-400">
+            <span>${p.Date ? p.Date.toString().slice(0, 10) : ''}</span>
+            <span class="font-medium text-slate-600">Fee: ₨${p.Fee || 0}</span>
+          </div>
+        `;
+        c.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    function fillPatientToForm(p) {
+      document.getElementById("pId").value = p.PatientID || '';
+      document.getElementById("pName").value = p.Name || '';
+      document.getElementById("pGender").value = p.Gender || 'Male';
+      document.getElementById("pAge").value = p.Age || '';
+      document.getElementById("pCnic").value = p.CNIC || '';
+      document.getElementById("pPhone").value = p.Phone || '';
+      document.getElementById("pAddress").value = p.Address || '';
+      document.getElementById("cAllergies").value = p.Allergies || '';
+      document.getElementById("cHistory").value = p.History || '';
+      window.scrollTo({ top: 100, behavior: 'smooth' });
+    }
+
+    function handleSearch() {
+      const q = document.getElementById("patientSearchInput").value.toLowerCase().trim();
+      if (!q) {
+        renderPatients(allPatients);
+        return;
+      }
+      const filtered = allPatients.filter(p => 
+        (p.PatientID && p.PatientID.toLowerCase().includes(q)) ||
+        (p.Name && p.Name.toLowerCase().includes(q)) ||
+        (p.CNIC && p.CNIC.includes(q))
+      );
+      renderPatients(filtered);
+    }
+
+    function clearSearch() {
+      document.getElementById("patientSearchInput").value = "";
+      renderPatients(allPatients);
+    }
+
+    function calculateStats(list) {
+      const now = new Date();
+      const todayStr = now.toISOString().slice(0, 10);
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+
+      let tVisits = 0, mVisits = 0, tFee = 0, mFee = 0;
+
+      list.forEach(p => {
+        const fee = Number(p.Fee) || 0;
+        const discount = Number(p.Discount) || 0;
+        const netFee = Math.max(0, fee - discount);
+
+        if (p.Date) {
+          const pDate = new Date(p.Date);
+          if (p.Date.toString().startsWith(todayStr)) {
+            tVisits++;
+            tFee += netFee;
+          }
+          if (pDate.getMonth() === currentMonth && pDate.getFullYear() === currentYear) {
+            mVisits++;
+            mFee += netFee;
+          }
+        }
+      });
+
+      document.getElementById("statTodayVisits").innerText = tVisits;
+      document.getElementById("statMonthVisits").innerText = mVisits;
+      document.getElementById("statTodayFee").innerText = `₨ ${tFee.toLocaleString()}`;
+      document.getElementById("statMonthFee").innerText = `₨ ${mFee.toLocaleString()}`;
+    }
+
+    async function saveClinicSettings(e) {
+      e.preventDefault();
+      const payload = {
+        action: "saveSettings",
+        clinicName: document.getElementById("admClinicName").value.trim(),
+        adminEmail: document.getElementById("admEmail").value.trim(),
+        logoUrl: document.getElementById("admLogoUrl").value.trim()
+      };
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(payload)
+      });
+      alert("Settings updated!");
+      loadInitialData();
+    }
+
+    async function addDoctor(e) {
+      e.preventDefault();
+      const payload = {
+        action: "addDoctor",
+        name: document.getElementById("docName").value.trim(),
+        username: document.getElementById("docUser").value.trim(),
+        password: document.getElementById("docPass").value.trim()
+      };
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(payload)
+      });
+      alert("Doctor credentials created!");
+      document.getElementById("addDoctorForm").reset();
+      loadDoctorsList();
+    }
+
+    async function loadDoctorsList() {
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=getDoctors`);
+        const json = await res.json();
+        const container = document.getElementById("doctorList");
+        container.innerHTML = "";
+        if (json.status === "success") {
+          json.data.forEach(d => {
+            container.innerHTML += `<div class="p-2 bg-slate-50 border border-slate-200 rounded-lg flex justify-between">
+              <span class="font-bold text-slate-800">${d.name} (${d.username})</span>
+              <span class="text-brand-600 font-semibold">${d.role}</span>
+            </div>`;
+          });
+        }
+      } catch (err) {}
+    }
+  </script>
+</body>
+</html>
