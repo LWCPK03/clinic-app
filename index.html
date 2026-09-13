@@ -114,14 +114,14 @@
         </div>
       </div>
       <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Today's Fee</span>
+        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Today's Net Fee</span>
         <div class="flex items-baseline justify-between mt-1">
           <span id="statTodayFee" class="text-2xl font-black text-emerald-600">₨ 0</span>
           <i data-lucide="wallet" class="w-5 h-5 text-emerald-200"></i>
         </div>
       </div>
       <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Monthly Fee</span>
+        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Monthly Net Fee</span>
         <div class="flex items-baseline justify-between mt-1">
           <span id="statMonthFee" class="text-2xl font-black text-slate-800">₨ 0</span>
           <i data-lucide="banknote" class="w-5 h-5 text-slate-300"></i>
@@ -201,14 +201,14 @@
               </tr>
             </thead>
             <tbody id="historyTableBody" class="divide-y divide-slate-100">
-              <!-- History rows -->
+              <!-- History rows injected here -->
             </tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- PATIENT CLINICAL ENCOUNTER FORM (Shows when New Patient chosen OR 'Add New Visit' clicked) -->
+    <!-- PATIENT CLINICAL ENCOUNTER FORM -->
     <div id="patientFormSection" class="hidden">
       <form id="clinicEntryForm" onsubmit="savePatientRecord(event)" class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-6">
 
@@ -336,19 +336,23 @@
           </div>
         </div>
 
-        <!-- Financials -->
+        <!-- Financials with Live Net Calculation -->
         <div class="pt-4 border-t border-slate-100">
           <h3 class="text-sm font-bold text-brand-900 uppercase tracking-wider flex items-center gap-2 mb-3">
             <i data-lucide="receipt" class="w-4 h-4 text-brand-600"></i> Fee & Payment
           </h3>
-          <div class="grid grid-cols-3 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div>
               <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Consultation Fee</label>
-              <input type="number" id="fFee" value="1000" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
+              <input type="number" id="fFee" value="1000" oninput="updateLiveNetFee()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
             </div>
             <div>
               <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Discount</label>
-              <input type="number" id="fDiscount" value="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+              <input type="number" id="fDiscount" value="0" oninput="updateLiveNetFee()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Net Payable</label>
+              <input type="text" id="fNetPayable" readonly value="₨ 1000" class="w-full px-3 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold rounded-xl text-xs">
             </div>
             <div>
               <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Method</label>
@@ -370,7 +374,7 @@
 
   </div>
 
-  <!-- ================= ADMIN PANEL (CLEAN TABBED INTERFACE) ================= -->
+  <!-- ================= ADMIN PANEL ================= -->
   <div id="adminPanel" class="max-w-6xl mx-auto px-4 py-8 flex-1 w-full hidden space-y-6">
 
     <!-- Admin Sub-Navigation Tabs -->
@@ -412,7 +416,6 @@
 
     <!-- SUB-TAB 2: DOCTOR MANAGEMENT -->
     <div id="subTabDoctors" class="hidden space-y-6">
-      <!-- Create or Update Doctor Form -->
       <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
         <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
           <i data-lucide="user-plus" class="w-5 h-5 text-brand-600"></i> Add or Update Doctor Credentials
@@ -438,7 +441,6 @@
         </form>
       </div>
 
-      <!-- Doctor Accounts List -->
       <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
         <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Existing Doctors List</h4>
         <div class="overflow-x-auto border border-slate-100 rounded-xl">
@@ -451,9 +453,7 @@
                 <th class="p-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody id="doctorTableBody" class="divide-y divide-slate-100">
-              <!-- Dynamically populated -->
-            </tbody>
+            <tbody id="doctorTableBody" class="divide-y divide-slate-100"></tbody>
           </table>
         </div>
       </div>
@@ -477,13 +477,11 @@
               <th class="p-3">Gender / Age</th>
               <th class="p-3">Contact</th>
               <th class="p-3">Diagnosis</th>
-              <th class="p-3">Fee</th>
+              <th class="p-3">Net Fee Paid</th>
               <th class="p-3 text-right">Rx Doc</th>
             </tr>
           </thead>
-          <tbody id="adminPatientTableBody" class="divide-y divide-slate-100">
-            <!-- Dynamically populated -->
-          </tbody>
+          <tbody id="adminPatientTableBody" class="divide-y divide-slate-100"></tbody>
         </table>
       </div>
     </div>
@@ -503,6 +501,7 @@
     document.addEventListener("DOMContentLoaded", () => {
       lucide.createIcons();
       addMedicineRow();
+      updateLiveNetFee();
 
       const savedUser = localStorage.getItem("clinicUser");
       if (savedUser) {
@@ -511,7 +510,14 @@
       }
     });
 
-    // 1. DYNAMIC MEDICINE ENTRY
+    // Live Net Fee Calculator for Form
+    function updateLiveNetFee() {
+      const fee = Number(document.getElementById("fFee").value) || 0;
+      const discount = Number(document.getElementById("fDiscount").value) || 0;
+      const net = Math.max(0, fee - discount);
+      document.getElementById("fNetPayable").value = `₨ ${net}`;
+    }
+
     function addMedicineRow() {
       const container = document.getElementById("medicinesContainer");
       const rowId = "med_" + Date.now();
@@ -530,7 +536,6 @@
       lucide.createIcons();
     }
 
-    // 2. AUTHENTICATION
     async function handleLogin(e) {
       e.preventDefault();
       const btn = document.getElementById("loginBtn");
@@ -602,7 +607,6 @@
       }
     }
 
-    // 3. DOCTOR PANEL PATIENT FLOW
     function selectPatientMode(mode) {
       const newCard = document.getElementById("modeCardNew");
       const extCard = document.getElementById("modeCardExisting");
@@ -615,10 +619,10 @@
         extSearchSec.classList.add("hidden");
         formSec.classList.remove("hidden");
 
-        // Clear and unlock form
         document.getElementById("clinicEntryForm").reset();
         document.getElementById("pId").readOnly = false;
         document.getElementById("pName").readOnly = false;
+        updateLiveNetFee();
       } else {
         extCard.classList.add("border-brand-500", "bg-brand-50/40");
         newCard.classList.remove("border-brand-500", "bg-brand-50/40");
@@ -634,7 +638,6 @@
 
       if (!query) return;
 
-      // Group distinct patients by PatientID
       const map = new Map();
       allPatients.forEach(p => {
         if (!map.has(p.PatientID)) map.set(p.PatientID, p);
@@ -674,31 +677,36 @@
       selectedPatientId = patientId;
       document.getElementById("searchResultsList").innerHTML = "";
 
-      // Fetch all visits of this patient
       const patientVisits = allPatients.filter(p => p.PatientID === patientId);
       if (patientVisits.length === 0) return;
 
-      const latest = patientVisits[0]; // Latest visit
+      const latest = patientVisits[0];
 
       document.getElementById("selectedPatientBadge").innerText = latest.PatientID;
       document.getElementById("selectedPatientTitle").innerText = latest.Name;
       document.getElementById("selectedPatientSubtitle").innerText = `${latest.Age} Y • ${latest.Gender} • Ph: ${latest.Phone || 'N/A'} • Addr: ${latest.Address || 'N/A'}`;
 
-      // Populate Table
       const tBody = document.getElementById("historyTableBody");
       tBody.innerHTML = "";
 
       patientVisits.forEach(v => {
         const tr = document.createElement("tr");
+        const rawFee = Number(v.Fee) || 0;
+        const rawDiscount = Number(v.Discount) || 0;
+        const netFee = Math.max(0, rawFee - rawDiscount);
+
         tr.innerHTML = `
-          <td class="p-3 font-medium text-slate-800">${v.Date || 'N/A'}</td>
+          <td class="p-3 font-medium text-slate-800">${v.Date ? v.Date.toString().slice(0, 16) : 'N/A'}</td>
           <td class="p-3 text-slate-600">${v.DoctorName || 'Doctor'}</td>
           <td class="p-3">
             <span class="font-bold text-slate-800">${v.Diagnosis || 'None'}</span>
             <p class="text-[10px] text-slate-500">${v.Symptoms || ''}</p>
           </td>
           <td class="p-3 text-[11px]">BP: ${v.BP || '-'} | Sugar: ${v.Sugar || '-'}</td>
-          <td class="p-3 font-semibold text-emerald-600">₨${v.Fee || 0}</td>
+          <td class="p-3">
+            <span class="font-bold text-emerald-600">₨ ${netFee}</span>
+            ${rawDiscount > 0 ? `<span class="text-[10px] text-slate-400 block line-through">₨ ${rawFee}</span>` : ''}
+          </td>
           <td class="p-3 text-right">
             ${v.DocURL ? `<a href="${v.DocURL}" target="_blank" class="px-2.5 py-1 bg-brand-50 text-brand-700 hover:bg-brand-100 rounded-lg text-xs font-semibold inline-flex items-center gap-1">Rx Doc</a>` : '-'}
           </td>
@@ -719,7 +727,6 @@
       document.getElementById("cAllergies").value = latest.Allergies || '';
       document.getElementById("cHistory").value = latest.History || '';
 
-      // Lock Demographics
       document.getElementById("pId").readOnly = true;
       document.getElementById("pName").readOnly = true;
     }
@@ -727,10 +734,10 @@
     function revealEncounterForm() {
       const formSec = document.getElementById("patientFormSection");
       formSec.classList.remove("hidden");
+      updateLiveNetFee();
       formSec.scrollIntoView({ behavior: 'smooth' });
     }
 
-    // 4. DATA LOADER & STATS
     async function loadInitialData() {
       try {
         const sRes = await fetch(`${SCRIPT_URL}?action=getSettings`);
@@ -801,7 +808,6 @@
       document.getElementById("statMonthFee").innerText = `₨ ${mFee.toLocaleString()}`;
     }
 
-    // 5. SAVE CLINICAL ENCOUNTER
     async function savePatientRecord(e) {
       e.preventDefault();
       const btn = document.getElementById("savePatientBtn");
@@ -868,7 +874,6 @@
       }
     }
 
-    // 6. ADMIN PANEL LOGIC & SUB-TABS
     function switchAdminSubTab(tab) {
       const secS = document.getElementById("subTabSettings");
       const secD = document.getElementById("subTabDoctors");
@@ -991,6 +996,10 @@
         return;
       }
       list.forEach(p => {
+        const rawFee = Number(p.Fee) || 0;
+        const rawDiscount = Number(p.Discount) || 0;
+        const netFee = Math.max(0, rawFee - rawDiscount);
+
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td class="p-3 font-mono font-bold text-brand-700">${p.PatientID || '-'}</td>
@@ -999,7 +1008,10 @@
           <td class="p-3">${p.Gender || '-'} / ${p.Age || '-'} Y</td>
           <td class="p-3 text-slate-600">${p.Phone || '-'}</td>
           <td class="p-3">${p.Diagnosis || '-'}</td>
-          <td class="p-3 font-semibold text-emerald-600">₨${p.Fee || 0}</td>
+          <td class="p-3">
+            <span class="font-semibold text-emerald-600">₨ ${netFee}</span>
+            ${rawDiscount > 0 ? `<span class="text-[10px] text-slate-400 block line-through">₨ ${rawFee}</span>` : ''}
+          </td>
           <td class="p-3 text-right">
             ${p.DocURL ? `<a href="${p.DocURL}" target="_blank" class="text-brand-600 hover:text-brand-800 font-semibold">Open Rx</a>` : '-'}
           </td>
