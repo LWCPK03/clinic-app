@@ -50,7 +50,7 @@
       <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Username</label>
-          <input type="text" id="loginUsername" required placeholder="admin or drkhan" 
+          <input type="text" id="loginUsername" required placeholder="admin or doctor username" 
             class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
         </div>
         <div>
@@ -62,11 +62,6 @@
           <span>Sign In</span>
           <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </button>
-        <div class="p-3 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-800 space-y-1">
-          <p class="font-bold">Default Credentials:</p>
-          <p>• Admin: <span class="font-mono font-bold">admin</span> / <span class="font-mono">admin123</span></p>
-          <p>• Doctor: <span class="font-mono font-bold">drkhan</span> / <span class="font-mono">123456</span></p>
-        </div>
       </form>
     </div>
   </div>
@@ -81,12 +76,12 @@
         </div>
         <div>
           <h1 id="topClinicName" class="font-bold text-lg text-slate-900 leading-tight">Clinic Portal</h1>
-          <span id="roleBadge" class="text-[11px] font-semibold text-brand-600 uppercase tracking-wider bg-brand-50 px-2 py-0.5 rounded-md">Doctor View</span>
+          <span id="roleBadge" class="text-[11px] font-semibold text-brand-600 uppercase tracking-wider bg-brand-50 px-2 py-0.5 rounded-md">Logged In</span>
         </div>
       </div>
 
       <div class="flex items-center gap-3">
-        <!-- Admin/Doctor View Switcher -->
+        <!-- Switch between Admin and Doctor if role is Admin -->
         <div id="adminNavTabs" class="hidden items-center bg-slate-100 p-1 rounded-xl text-xs font-semibold">
           <button onclick="switchView('doctor')" id="btnTabDoctor" class="px-3 py-1.5 rounded-lg bg-white shadow-xs text-slate-900">Doctor Panel</button>
           <button onclick="switchView('admin')" id="btnTabAdmin" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900">Admin Panel</button>
@@ -100,9 +95,9 @@
   </header>
 
   <!-- ================= DOCTOR PANEL ================= -->
-  <div id="doctorPanel" class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full flex flex-col gap-6">
+  <div id="doctorPanel" class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full space-y-6">
 
-    <!-- Analytics Cards -->
+    <!-- KPI Analytics Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
         <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Today's Visits</span>
@@ -134,259 +129,376 @@
       </div>
     </div>
 
-    <!-- Quick Patient Search Bar -->
-    <div class="bg-white rounded-2xl border border-slate-200 p-3 shadow-xs flex items-center gap-3">
-      <i data-lucide="search" class="w-5 h-5 text-slate-400 ml-2"></i>
-      <input type="text" id="patientSearchInput" oninput="handleSearch()" placeholder="Search patient history by ID, Name, or CNIC..." 
-        class="w-full bg-transparent text-sm focus:outline-none placeholder-slate-400">
-      <button onclick="clearSearch()" class="text-xs text-slate-400 hover:text-slate-600 px-2 font-medium">Clear</button>
-    </div>
+    <!-- INITIAL CHOICE: NEW PATIENT VS EXISTING PATIENT -->
+    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+      <h2 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+        <i data-lucide="user-check" class="w-5 h-5 text-brand-600"></i> Patient Consultation Mode
+      </h2>
 
-    <!-- WORKFLOW GRID -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-      <!-- LEFT: Entry Form (7 Cols) -->
-      <div class="lg:col-span-7">
-        <form id="clinicEntryForm" onsubmit="savePatientRecord(event)" class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-6">
-
-          <!-- Section 1: Demographics -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- New Patient Option -->
+        <div onclick="selectPatientMode('new')" id="modeCardNew" class="border-2 border-slate-200 hover:border-brand-500 rounded-2xl p-5 cursor-pointer transition flex items-center gap-4 bg-slate-50">
+          <div class="w-12 h-12 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center">
+            <i data-lucide="user-plus" class="w-6 h-6"></i>
+          </div>
           <div>
-            <h3 class="text-sm font-bold text-brand-900 uppercase tracking-wider flex items-center gap-2 mb-3">
-              <i data-lucide="user" class="w-4 h-4 text-brand-600"></i> Basic Information
-            </h3>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Patient ID *</label>
-                <input type="text" id="pId" required placeholder="e.g. PAT-101" 
-                  class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none font-semibold text-brand-700">
-              </div>
-              <div class="sm:col-span-2">
-                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Full Name *</label>
-                <input type="text" id="pName" required placeholder="Patient Name" 
-                  class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Gender</label>
-                <select id="pGender" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Child">Child</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Age (Years) *</label>
-                <input type="number" id="pAge" required placeholder="32" 
-                  class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">CNIC / B-Form</label>
-                <input type="text" id="pCnic" placeholder="35201-xxxxxxx-x" 
-                  class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Contact Phone</label>
-                <input type="text" id="pPhone" placeholder="0300-xxxxxxx" 
-                  class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
-              </div>
-              <div class="sm:col-span-2">
-                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Residential Address</label>
-                <input type="text" id="pAddress" placeholder="Town, City" 
-                  class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
-              </div>
-            </div>
+            <h4 class="font-bold text-slate-900">New Patient</h4>
+            <p class="text-xs text-slate-500">Register new patient demographic & prescription</p>
           </div>
+        </div>
 
-          <!-- Section 2: Vitals -->
-          <div class="pt-4 border-t border-slate-100">
-            <h3 class="text-sm font-bold text-brand-900 uppercase tracking-wider flex items-center gap-2 mb-3">
-              <i data-lucide="heart-pulse" class="w-4 h-4 text-brand-600"></i> Vital Signs
-            </h3>
-            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
-              <div>
-                <label class="block text-[10px] font-bold text-slate-500 uppercase">BP (mmHg)</label>
-                <input type="text" id="vBp" placeholder="120/80" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
-              </div>
-              <div>
-                <label class="block text-[10px] font-bold text-slate-500 uppercase">Pulse (bpm)</label>
-                <input type="text" id="vPulse" placeholder="78" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
-              </div>
-              <div>
-                <label class="block text-[10px] font-bold text-slate-500 uppercase">Temp (°F)</label>
-                <input type="text" id="vTemp" placeholder="98.6" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
-              </div>
-              <div>
-                <label class="block text-[10px] font-bold text-slate-500 uppercase">Sugar (mg/dL)</label>
-                <input type="text" id="vSugar" placeholder="110 RBS" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
-              </div>
-              <div>
-                <label class="block text-[10px] font-bold text-slate-500 uppercase">Weight (kg)</label>
-                <input type="text" id="vWeight" placeholder="68" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
-              </div>
-            </div>
+        <!-- Existing Patient Option -->
+        <div onclick="selectPatientMode('existing')" id="modeCardExisting" class="border-2 border-slate-200 hover:border-brand-500 rounded-2xl p-5 cursor-pointer transition flex items-center gap-4 bg-slate-50">
+          <div class="w-12 h-12 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center">
+            <i data-lucide="search" class="w-6 h-6"></i>
           </div>
-
-          <!-- Section 3: Clinical Notes -->
-          <div class="pt-4 border-t border-slate-100">
-            <h3 class="text-sm font-bold text-brand-900 uppercase tracking-wider flex items-center gap-2 mb-3">
-              <i data-lucide="stethoscope" class="w-4 h-4 text-brand-600"></i> Clinical Notes
-            </h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Symptoms / Complaints</label>
-                <textarea id="cSymptoms" rows="2" placeholder="Fever since 2 days..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"></textarea>
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Diagnosis</label>
-                <textarea id="cDiagnosis" rows="2" placeholder="Viral infection..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800"></textarea>
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Known Allergies</label>
-                <input type="text" id="cAllergies" placeholder="Penicillin, Dust, None" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Medical / Surgical History</label>
-                <input type="text" id="cHistory" placeholder="Hypertension since 5 yrs..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-              </div>
-            </div>
-          </div>
-
-          <!-- Section 4: Prescription & Drugs -->
-          <div class="pt-4 border-t border-slate-100">
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="text-sm font-bold text-brand-900 uppercase tracking-wider flex items-center gap-2">
-                <i data-lucide="pill" class="w-4 h-4 text-brand-600"></i> Prescription & Medication
-              </h3>
-              <button type="button" onclick="addMedicineRow()" class="text-xs font-semibold text-brand-600 hover:text-brand-700 flex items-center gap-1">
-                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add Drug
-              </button>
-            </div>
-            <div id="medicinesContainer" class="space-y-2">
-              <!-- JS Injected Row -->
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-              <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Required Lab Tests</label>
-                <input type="text" id="rxLabTests" placeholder="CBC, LFTs, Sugar Fasting" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Follow-up Date</label>
-                <input type="date" id="rxFollowUp" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-              </div>
-            </div>
-          </div>
-
-          <!-- Section 5: Financials -->
-          <div class="pt-4 border-t border-slate-100">
-            <h3 class="text-sm font-bold text-brand-900 uppercase tracking-wider flex items-center gap-2 mb-3">
-              <i data-lucide="receipt" class="w-4 h-4 text-brand-600"></i> Fee & Payment
-            </h3>
-            <div class="grid grid-cols-3 gap-3">
-              <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Consultation Fee</label>
-                <input type="number" id="fFee" value="1000" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Discount</label>
-                <input type="number" id="fDiscount" value="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Method</label>
-                <select id="fMethod" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-                  <option value="Cash">Cash</option>
-                  <option value="Online">Online / Card</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <button type="submit" id="savePatientBtn" 
-            class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-md shadow-brand-200 flex items-center justify-center gap-2 transition cursor-pointer">
-            <i data-lucide="cloud-upload" class="w-4 h-4"></i>
-            <span>Save & Generate Google Docs Rx</span>
-          </button>
-        </form>
-      </div>
-
-      <!-- RIGHT: Patients Queue & Search (5 Cols) -->
-      <div class="lg:col-span-5 space-y-4">
-        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
-          <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-3">
-            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
-              <i data-lucide="history" class="w-4 h-4 text-brand-600"></i> Patient Directory
-            </h3>
-            <button onclick="loadInitialData()" class="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition" title="Refresh list">
-              <i data-lucide="refresh-cw" class="w-4 h-4" id="spinSync"></i>
-            </button>
-          </div>
-
-          <div id="patientListContainer" class="space-y-3 max-h-[750px] overflow-y-auto pr-1">
-            <p class="text-xs text-center py-10 text-slate-400">Loading directory from Google Sheets...</p>
+          <div>
+            <h4 class="font-bold text-slate-900">Existing Patient</h4>
+            <p class="text-xs text-slate-500">Search by ID / Name / CNIC to view past history</p>
           </div>
         </div>
       </div>
-
     </div>
-  </div>
 
-  <!-- ================= ADMIN PANEL ================= -->
-  <div id="adminPanel" class="max-w-4xl mx-auto px-4 py-8 flex-1 w-full hidden space-y-8">
-    
-    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
-      <div class="flex items-center gap-2 mb-4 border-b border-slate-100 pb-3">
-        <i data-lucide="settings" class="w-5 h-5 text-brand-600"></i>
-        <h2 class="font-bold text-slate-800">Clinic Identity & Branding</h2>
+    <!-- EXISTING PATIENT SEARCH & HISTORY SECTION -->
+    <div id="existingSearchSection" class="hidden bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+      <div class="flex items-center gap-3">
+        <i data-lucide="search" class="w-5 h-5 text-slate-400"></i>
+        <input type="text" id="existingSearchInput" oninput="handleExistingSearch()" placeholder="Search patient by Patient ID, Name, or CNIC..." 
+          class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
       </div>
 
-      <form id="settingsForm" onsubmit="saveClinicSettings(event)" class="space-y-4">
+      <!-- Live Search Results Dropdown/List -->
+      <div id="searchResultsList" class="space-y-2 max-h-56 overflow-y-auto"></div>
+
+      <!-- SELECTED PATIENT PAST HISTORY TABLE -->
+      <div id="patientHistoryContainer" class="hidden pt-4 border-t border-slate-100 space-y-4">
+        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 bg-brand-50 p-4 rounded-xl border border-brand-100">
+          <div>
+            <span id="selectedPatientBadge" class="text-xs font-mono font-bold bg-brand-200 text-brand-900 px-2 py-0.5 rounded">PAT-ID</span>
+            <h3 id="selectedPatientTitle" class="text-base font-bold text-slate-900 mt-1">Patient Name</h3>
+            <p id="selectedPatientSubtitle" class="text-xs text-slate-600">Age / Gender / Contact / Address</p>
+          </div>
+
+          <!-- Add New Visit Action Button -->
+          <button onclick="revealEncounterForm()" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-xs cursor-pointer">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Add New Visit / Consultation</span>
+          </button>
+        </div>
+
+        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Complete Previous History</h4>
+        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+          <table class="w-full text-left text-xs text-slate-600">
+            <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+              <tr>
+                <th class="p-3">Visit Date</th>
+                <th class="p-3">Attending Doctor</th>
+                <th class="p-3">Diagnosis & Symptoms</th>
+                <th class="p-3">Vitals (BP/Sugar)</th>
+                <th class="p-3">Fee Paid</th>
+                <th class="p-3 text-right">Rx Google Doc</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody" class="divide-y divide-slate-100">
+              <!-- History rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PATIENT CLINICAL ENCOUNTER FORM (Shows when New Patient chosen OR 'Add New Visit' clicked) -->
+    <div id="patientFormSection" class="hidden">
+      <form id="clinicEntryForm" onsubmit="savePatientRecord(event)" class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-6">
+
+        <!-- Demographics -->
         <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Admin Email (Connected ID)</label>
+          <h3 class="text-sm font-bold text-brand-900 uppercase tracking-wider flex items-center gap-2 mb-3">
+            <i data-lucide="user" class="w-4 h-4 text-brand-600"></i> Patient Basic Details
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Patient ID *</label>
+              <input type="text" id="pId" required placeholder="e.g. PAT-101" 
+                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none font-semibold text-brand-700">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Full Name *</label>
+              <input type="text" id="pName" required placeholder="Patient Name" 
+                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Gender</label>
+              <select id="pGender" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Child">Child</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Age (Years) *</label>
+              <input type="number" id="pAge" required placeholder="32" 
+                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">CNIC / B-Form</label>
+              <input type="text" id="pCnic" placeholder="35201-xxxxxxx-x" 
+                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Contact Phone</label>
+              <input type="text" id="pPhone" placeholder="0300-xxxxxxx" 
+                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Residential Address</label>
+              <input type="text" id="pAddress" placeholder="Town, City" 
+                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            </div>
+          </div>
+        </div>
+
+        <!-- Vitals -->
+        <div class="pt-4 border-t border-slate-100">
+          <h3 class="text-sm font-bold text-brand-900 uppercase tracking-wider flex items-center gap-2 mb-3">
+            <i data-lucide="heart-pulse" class="w-4 h-4 text-brand-600"></i> Vital Signs
+          </h3>
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            <div>
+              <label class="block text-[10px] font-bold text-slate-500 uppercase">BP (mmHg)</label>
+              <input type="text" id="vBp" placeholder="120/80" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-slate-500 uppercase">Pulse (bpm)</label>
+              <input type="text" id="vPulse" placeholder="78" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-slate-500 uppercase">Temp (°F)</label>
+              <input type="text" id="vTemp" placeholder="98.6" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-slate-500 uppercase">Sugar (mg/dL)</label>
+              <input type="text" id="vSugar" placeholder="110 RBS" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-slate-500 uppercase">Weight (kg)</label>
+              <input type="text" id="vWeight" placeholder="68" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+            </div>
+          </div>
+        </div>
+
+        <!-- Clinical Notes -->
+        <div class="pt-4 border-t border-slate-100">
+          <h3 class="text-sm font-bold text-brand-900 uppercase tracking-wider flex items-center gap-2 mb-3">
+            <i data-lucide="stethoscope" class="w-4 h-4 text-brand-600"></i> Clinical Notes
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Symptoms / Complaints</label>
+              <textarea id="cSymptoms" rows="2" placeholder="Fever since 2 days..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"></textarea>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Diagnosis</label>
+              <textarea id="cDiagnosis" rows="2" placeholder="Viral infection..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800"></textarea>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Known Allergies</label>
+              <input type="text" id="cAllergies" placeholder="Penicillin, None" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Medical / Surgical History</label>
+              <input type="text" id="cHistory" placeholder="Hypertension..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+            </div>
+          </div>
+        </div>
+
+        <!-- Prescription -->
+        <div class="pt-4 border-t border-slate-100">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-bold text-brand-900 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="pill" class="w-4 h-4 text-brand-600"></i> Prescription & Medication
+            </h3>
+            <button type="button" onclick="addMedicineRow()" class="text-xs font-semibold text-brand-600 hover:text-brand-700 flex items-center gap-1">
+              <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add Drug
+            </button>
+          </div>
+          <div id="medicinesContainer" class="space-y-2"></div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Required Lab Tests</label>
+              <input type="text" id="rxLabTests" placeholder="CBC, LFTs" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Follow-up Date</label>
+              <input type="date" id="rxFollowUp" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+            </div>
+          </div>
+        </div>
+
+        <!-- Financials -->
+        <div class="pt-4 border-t border-slate-100">
+          <h3 class="text-sm font-bold text-brand-900 uppercase tracking-wider flex items-center gap-2 mb-3">
+            <i data-lucide="receipt" class="w-4 h-4 text-brand-600"></i> Fee & Payment
+          </h3>
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Consultation Fee</label>
+              <input type="number" id="fFee" value="1000" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Discount</label>
+              <input type="number" id="fDiscount" value="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Method</label>
+              <select id="fMethod" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                <option value="Cash">Cash</option>
+                <option value="Online">Online / Card</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" id="savePatientBtn" 
+          class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-md shadow-brand-200 flex items-center justify-center gap-2 transition cursor-pointer">
+          <i data-lucide="cloud-upload" class="w-4 h-4"></i>
+          <span>Save Visit & Generate Google Docs Rx</span>
+        </button>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- ================= ADMIN PANEL (CLEAN TABBED INTERFACE) ================= -->
+  <div id="adminPanel" class="max-w-6xl mx-auto px-4 py-8 flex-1 w-full hidden space-y-6">
+
+    <!-- Admin Sub-Navigation Tabs -->
+    <div class="flex items-center gap-2 bg-white border border-slate-200 p-1.5 rounded-2xl shadow-xs">
+      <button onclick="switchAdminSubTab('settings')" id="tabBtnSettings" class="px-4 py-2 rounded-xl text-xs font-bold bg-brand-50 text-brand-700 transition flex items-center gap-2">
+        <i data-lucide="settings" class="w-4 h-4"></i> Clinic Settings
+      </button>
+      <button onclick="switchAdminSubTab('doctors')" id="tabBtnDoctors" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-900 transition flex items-center gap-2">
+        <i data-lucide="user-cog" class="w-4 h-4"></i> Doctor Accounts
+      </button>
+      <button onclick="switchAdminSubTab('patients')" id="tabBtnPatients" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-900 transition flex items-center gap-2">
+        <i data-lucide="folder-users" class="w-4 h-4"></i> Patient Records
+      </button>
+    </div>
+
+    <!-- SUB-TAB 1: CLINIC SETTINGS -->
+    <div id="subTabSettings" class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+      <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+        <i data-lucide="sliders" class="w-5 h-5 text-brand-600"></i> Clinic Branding & Google Drive Link
+      </h3>
+      <form id="settingsForm" onsubmit="saveClinicSettings(event)" class="space-y-4 max-w-xl">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Admin Email (Connected Google ID)</label>
           <input type="email" id="admEmail" required placeholder="admin@gmail.com" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm">
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Clinic Name (Appears on Prescription)</label>
-          <input type="text" id="admClinicName" required placeholder="e.g. City Health Medical Complex" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold">
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Clinic Name (Printed on Rx Header)</label>
+          <input type="text" id="admClinicName" required placeholder="City Medical Complex" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold">
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Clinic Logo Image URL</label>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Clinic Logo URL</label>
           <input type="url" id="admLogoUrl" placeholder="https://example.com/logo.png" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm">
         </div>
-        <button type="submit" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold rounded-xl shadow-xs">
+        <button type="submit" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold rounded-xl shadow-xs">
           Save Settings
         </button>
       </form>
     </div>
 
-    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
-      <div class="flex items-center gap-2 mb-4 border-b border-slate-100 pb-3">
-        <i data-lucide="user-check" class="w-5 h-5 text-brand-600"></i>
-        <h2 class="font-bold text-slate-800">Doctor Access Management</h2>
+    <!-- SUB-TAB 2: DOCTOR MANAGEMENT -->
+    <div id="subTabDoctors" class="hidden space-y-6">
+      <!-- Create or Update Doctor Form -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+        <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <i data-lucide="user-plus" class="w-5 h-5 text-brand-600"></i> Add or Update Doctor Credentials
+        </h3>
+        <form id="doctorMgmtForm" onsubmit="saveDoctorCredentials(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Doctor Name</label>
+            <input type="text" id="docName" required placeholder="Dr. Khan" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Username (Key)</label>
+            <input type="text" id="docUser" required placeholder="drkhan" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Password</label>
+            <input type="text" id="docPass" required placeholder="••••••••" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+          </div>
+          <div class="sm:col-span-3 flex justify-end">
+            <button type="submit" id="btnSaveDoctor" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs rounded-xl transition">
+              Save / Update Doctor
+            </button>
+          </div>
+        </form>
       </div>
 
-      <form id="addDoctorForm" onsubmit="addDoctor(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-        <input type="text" id="docName" required placeholder="Dr. Full Name" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-        <input type="text" id="docUser" required placeholder="Username" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-        <input type="password" id="docPass" required placeholder="Password" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-        <button type="submit" class="sm:col-span-3 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs rounded-xl transition">
-          Create Doctor Credentials
-        </button>
-      </form>
-
-      <div class="border-t border-slate-100 pt-4">
-        <h4 class="text-xs font-bold uppercase text-slate-400 mb-2">Existing Registered Doctors</h4>
-        <div id="doctorList" class="space-y-2 text-xs">
-          <p class="text-slate-400">Loading accounts...</p>
+      <!-- Doctor Accounts List -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Existing Doctors List</h4>
+        <div class="overflow-x-auto border border-slate-100 rounded-xl">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-600 border-b border-slate-100">
+              <tr>
+                <th class="p-3">Doctor Name</th>
+                <th class="p-3">Username</th>
+                <th class="p-3">Password</th>
+                <th class="p-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="doctorTableBody" class="divide-y divide-slate-100">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
+
+    <!-- SUB-TAB 3: MASTER PATIENT DIRECTORY -->
+    <div id="subTabPatients" class="hidden bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+      <div class="flex items-center gap-3">
+        <i data-lucide="search" class="w-5 h-5 text-slate-400"></i>
+        <input type="text" id="adminPatientSearchInput" oninput="filterAdminPatientRecords()" placeholder="Search directory by Patient ID, Name, Phone, or CNIC..." 
+          class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+      </div>
+
+      <div class="overflow-x-auto border border-slate-100 rounded-xl">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-100">
+            <tr>
+              <th class="p-3">ID</th>
+              <th class="p-3">Date</th>
+              <th class="p-3">Patient Name</th>
+              <th class="p-3">Gender / Age</th>
+              <th class="p-3">Contact</th>
+              <th class="p-3">Diagnosis</th>
+              <th class="p-3">Fee</th>
+              <th class="p-3 text-right">Rx Doc</th>
+            </tr>
+          </thead>
+          <tbody id="adminPatientTableBody" class="divide-y divide-slate-100">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 
-  <!-- JAVASCRIPT ENGINE -->
+  <!-- JAVASCRIPT APPLICATION CORE -->
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzMW6OIiPEaAmydSl-Owi1ehHFaSDmdRkSA_Fx3OYpZRoQmcTRBoDnbT34Mh8q0umy_UA/exec";
 
     let currentUser = null;
     let clinicSettings = {};
     let allPatients = [];
+    let allDoctors = [];
+    let selectedPatientId = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       lucide.createIcons();
@@ -399,6 +511,7 @@
       }
     });
 
+    // 1. DYNAMIC MEDICINE ENTRY
     function addMedicineRow() {
       const container = document.getElementById("medicinesContainer");
       const rowId = "med_" + Date.now();
@@ -417,11 +530,12 @@
       lucide.createIcons();
     }
 
+    // 2. AUTHENTICATION
     async function handleLogin(e) {
       e.preventDefault();
       const btn = document.getElementById("loginBtn");
       btn.disabled = true;
-      btn.innerText = "Authenticating...";
+      btn.innerText = "Signing in...";
 
       const payload = {
         action: "login",
@@ -445,7 +559,7 @@
           alert(result.message || "Invalid credentials");
         }
       } catch (err) {
-        alert("Server unreachable. Please check connection.");
+        alert("Unable to reach Google Script. Check network.");
       } finally {
         btn.disabled = false;
         btn.innerText = "Sign In";
@@ -479,7 +593,7 @@
         admP.classList.remove("hidden");
         bAdm.className = "px-3 py-1.5 rounded-lg bg-white shadow-xs text-slate-900";
         bDoc.className = "px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900";
-        loadDoctorsList();
+        switchAdminSubTab('settings');
       } else {
         admP.classList.add("hidden");
         docP.classList.remove("hidden");
@@ -488,10 +602,136 @@
       }
     }
 
-    async function loadInitialData() {
-      const spinner = document.getElementById("spinSync");
-      spinner.classList.add("animate-spin");
+    // 3. DOCTOR PANEL PATIENT FLOW
+    function selectPatientMode(mode) {
+      const newCard = document.getElementById("modeCardNew");
+      const extCard = document.getElementById("modeCardExisting");
+      const extSearchSec = document.getElementById("existingSearchSection");
+      const formSec = document.getElementById("patientFormSection");
 
+      if (mode === 'new') {
+        newCard.classList.add("border-brand-500", "bg-brand-50/40");
+        extCard.classList.remove("border-brand-500", "bg-brand-50/40");
+        extSearchSec.classList.add("hidden");
+        formSec.classList.remove("hidden");
+
+        // Clear and unlock form
+        document.getElementById("clinicEntryForm").reset();
+        document.getElementById("pId").readOnly = false;
+        document.getElementById("pName").readOnly = false;
+      } else {
+        extCard.classList.add("border-brand-500", "bg-brand-50/40");
+        newCard.classList.remove("border-brand-500", "bg-brand-50/40");
+        extSearchSec.classList.remove("hidden");
+        formSec.classList.add("hidden");
+      }
+    }
+
+    function handleExistingSearch() {
+      const query = document.getElementById("existingSearchInput").value.toLowerCase().trim();
+      const listContainer = document.getElementById("searchResultsList");
+      listContainer.innerHTML = "";
+
+      if (!query) return;
+
+      // Group distinct patients by PatientID
+      const map = new Map();
+      allPatients.forEach(p => {
+        if (!map.has(p.PatientID)) map.set(p.PatientID, p);
+      });
+
+      const matched = Array.from(map.values()).filter(p => 
+        (p.PatientID && p.PatientID.toLowerCase().includes(query)) ||
+        (p.Name && p.Name.toLowerCase().includes(query)) ||
+        (p.CNIC && p.CNIC.includes(query))
+      );
+
+      if (matched.length === 0) {
+        listContainer.innerHTML = `<p class="text-xs text-slate-400 p-2">No matching patient record found.</p>`;
+        return;
+      }
+
+      matched.forEach(p => {
+        const item = document.createElement("div");
+        item.className = "p-3 bg-slate-50 hover:bg-brand-50 border border-slate-200 rounded-xl cursor-pointer flex justify-between items-center transition";
+        item.onclick = () => selectExistingPatient(p.PatientID);
+        item.innerHTML = `
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono font-bold text-brand-700">${p.PatientID}</span>
+              <span class="text-sm font-bold text-slate-800">${p.Name}</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-0.5">CNIC: ${p.CNIC || 'N/A'} • Phone: ${p.Phone || 'N/A'}</p>
+          </div>
+          <span class="text-xs text-brand-600 font-semibold flex items-center gap-1">View History <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></span>
+        `;
+        listContainer.appendChild(item);
+      });
+      lucide.createIcons();
+    }
+
+    function selectExistingPatient(patientId) {
+      selectedPatientId = patientId;
+      document.getElementById("searchResultsList").innerHTML = "";
+
+      // Fetch all visits of this patient
+      const patientVisits = allPatients.filter(p => p.PatientID === patientId);
+      if (patientVisits.length === 0) return;
+
+      const latest = patientVisits[0]; // Latest visit
+
+      document.getElementById("selectedPatientBadge").innerText = latest.PatientID;
+      document.getElementById("selectedPatientTitle").innerText = latest.Name;
+      document.getElementById("selectedPatientSubtitle").innerText = `${latest.Age} Y • ${latest.Gender} • Ph: ${latest.Phone || 'N/A'} • Addr: ${latest.Address || 'N/A'}`;
+
+      // Populate Table
+      const tBody = document.getElementById("historyTableBody");
+      tBody.innerHTML = "";
+
+      patientVisits.forEach(v => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="p-3 font-medium text-slate-800">${v.Date || 'N/A'}</td>
+          <td class="p-3 text-slate-600">${v.DoctorName || 'Doctor'}</td>
+          <td class="p-3">
+            <span class="font-bold text-slate-800">${v.Diagnosis || 'None'}</span>
+            <p class="text-[10px] text-slate-500">${v.Symptoms || ''}</p>
+          </td>
+          <td class="p-3 text-[11px]">BP: ${v.BP || '-'} | Sugar: ${v.Sugar || '-'}</td>
+          <td class="p-3 font-semibold text-emerald-600">₨${v.Fee || 0}</td>
+          <td class="p-3 text-right">
+            ${v.DocURL ? `<a href="${v.DocURL}" target="_blank" class="px-2.5 py-1 bg-brand-50 text-brand-700 hover:bg-brand-100 rounded-lg text-xs font-semibold inline-flex items-center gap-1">Rx Doc</a>` : '-'}
+          </td>
+        `;
+        tBody.appendChild(tr);
+      });
+
+      document.getElementById("patientHistoryContainer").classList.remove("hidden");
+
+      // Auto pre-populate demographics in encounter form
+      document.getElementById("pId").value = latest.PatientID;
+      document.getElementById("pName").value = latest.Name;
+      document.getElementById("pGender").value = latest.Gender || 'Male';
+      document.getElementById("pAge").value = latest.Age;
+      document.getElementById("pCnic").value = latest.CNIC || '';
+      document.getElementById("pPhone").value = latest.Phone || '';
+      document.getElementById("pAddress").value = latest.Address || '';
+      document.getElementById("cAllergies").value = latest.Allergies || '';
+      document.getElementById("cHistory").value = latest.History || '';
+
+      // Lock Demographics
+      document.getElementById("pId").readOnly = true;
+      document.getElementById("pName").readOnly = true;
+    }
+
+    function revealEncounterForm() {
+      const formSec = document.getElementById("patientFormSection");
+      formSec.classList.remove("hidden");
+      formSec.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 4. DATA LOADER & STATS
+    async function loadInitialData() {
       try {
         const sRes = await fetch(`${SCRIPT_URL}?action=getSettings`);
         const sJson = await sRes.json();
@@ -504,13 +744,11 @@
         const pJson = await pRes.json();
         if (pJson.status === "success") {
           allPatients = pJson.data;
-          renderPatients(allPatients);
           calculateStats(allPatients);
+          renderAdminPatientTable(allPatients);
         }
       } catch (err) {
         console.error(err);
-      } finally {
-        spinner.classList.remove("animate-spin");
       }
     }
 
@@ -531,11 +769,44 @@
       }
     }
 
+    function calculateStats(list) {
+      const now = new Date();
+      const todayStr = now.toISOString().slice(0, 10);
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+
+      let tVisits = 0, mVisits = 0, tFee = 0, mFee = 0;
+
+      list.forEach(p => {
+        const fee = Number(p.Fee) || 0;
+        const discount = Number(p.Discount) || 0;
+        const netFee = Math.max(0, fee - discount);
+
+        if (p.Date) {
+          const pDate = new Date(p.Date);
+          if (p.Date.toString().startsWith(todayStr)) {
+            tVisits++;
+            tFee += netFee;
+          }
+          if (pDate.getMonth() === currentMonth && pDate.getFullYear() === currentYear) {
+            mVisits++;
+            mFee += netFee;
+          }
+        }
+      });
+
+      document.getElementById("statTodayVisits").innerText = tVisits;
+      document.getElementById("statMonthVisits").innerText = mVisits;
+      document.getElementById("statTodayFee").innerText = `₨ ${tFee.toLocaleString()}`;
+      document.getElementById("statMonthFee").innerText = `₨ ${mFee.toLocaleString()}`;
+    }
+
+    // 5. SAVE CLINICAL ENCOUNTER
     async function savePatientRecord(e) {
       e.preventDefault();
       const btn = document.getElementById("savePatientBtn");
       btn.disabled = true;
-      btn.innerHTML = `<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span> Generating A4 Rx Doc...`;
+      btn.innerHTML = `<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span> Writing to Drive & Sheet...`;
 
       const medRows = document.querySelectorAll("#medicinesContainer > div");
       let medicines = [];
@@ -582,116 +853,52 @@
         const result = await res.json();
 
         if (result.status === "success") {
-          alert("Patient saved! Google Doc Prescription generated.");
-          if (result.docUrl) {
-            window.open(result.docUrl, "_blank");
-          }
+          alert("Visit successfully recorded!\nGoogle Doc Rx Created.");
+          if (result.docUrl) window.open(result.docUrl, "_blank");
           document.getElementById("clinicEntryForm").reset();
+          document.getElementById("patientFormSection").classList.add("hidden");
           loadInitialData();
         }
       } catch (err) {
-        alert("Failed to communicate with Google Drive.");
+        alert("Failed to communicate with Apps Script.");
       } finally {
         btn.disabled = false;
-        btn.innerHTML = `<i data-lucide="cloud-upload" class="w-4 h-4"></i><span>Save & Generate Google Docs Rx</span>`;
+        btn.innerHTML = `<i data-lucide="cloud-upload" class="w-4 h-4"></i><span>Save Visit & Generate Google Docs Rx</span>`;
         lucide.createIcons();
       }
     }
 
-    function renderPatients(list) {
-      const c = document.getElementById("patientListContainer");
-      c.innerHTML = "";
+    // 6. ADMIN PANEL LOGIC & SUB-TABS
+    function switchAdminSubTab(tab) {
+      const secS = document.getElementById("subTabSettings");
+      const secD = document.getElementById("subTabDoctors");
+      const secP = document.getElementById("subTabPatients");
 
-      if (list.length === 0) {
-        c.innerHTML = `<p class="text-xs text-center py-6 text-slate-400">No records found.</p>`;
-        return;
+      const btnS = document.getElementById("tabBtnSettings");
+      const btnD = document.getElementById("tabBtnDoctors");
+      const btnP = document.getElementById("tabBtnPatients");
+
+      secS.classList.add("hidden");
+      secD.classList.add("hidden");
+      secP.classList.add("hidden");
+
+      btnS.className = "px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-900 transition flex items-center gap-2";
+      btnD.className = "px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-900 transition flex items-center gap-2";
+      btnP.className = "px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-900 transition flex items-center gap-2";
+
+      if (tab === 'settings') {
+        secS.classList.remove("hidden");
+        btnS.className = "px-4 py-2 rounded-xl text-xs font-bold bg-brand-50 text-brand-700 transition flex items-center gap-2";
+      } else if (tab === 'doctors') {
+        secD.classList.remove("hidden");
+        btnD.className = "px-4 py-2 rounded-xl text-xs font-bold bg-brand-50 text-brand-700 transition flex items-center gap-2";
+        loadDoctors();
+      } else if (tab === 'patients') {
+        secP.classList.remove("hidden");
+        btnP.className = "px-4 py-2 rounded-xl text-xs font-bold bg-brand-50 text-brand-700 transition flex items-center gap-2";
+        renderAdminPatientTable(allPatients);
       }
-
-      list.forEach(p => {
-        const card = document.createElement("div");
-        card.className = "p-3 bg-slate-50 hover:bg-brand-50/50 border border-slate-200 rounded-xl transition cursor-pointer";
-        card.onclick = () => fillPatientToForm(p);
-        card.innerHTML = `
-          <div class="flex justify-between items-start">
-            <div>
-              <span class="text-xs font-black text-brand-700 font-mono">${p.PatientID || 'N/A'}</span>
-              <h4 class="text-sm font-bold text-slate-800">${p.Name || 'Unnamed'}</h4>
-              <p class="text-[11px] text-slate-500">${p.Age} Y • ${p.Gender} • ${p.Phone || 'No Phone'}</p>
-            </div>
-            ${p.DocURL ? `<a href="${p.DocURL}" target="_blank" onclick="event.stopPropagation()" class="p-1 text-brand-600 hover:text-brand-800" title="Open Google Doc Rx"><i data-lucide="file-text" class="w-4 h-4"></i></a>` : ''}
-          </div>
-          <div class="mt-2 pt-2 border-t border-slate-200/60 flex justify-between items-center text-[10px] text-slate-400">
-            <span>${p.Date ? p.Date.toString().slice(0, 10) : ''}</span>
-            <span class="font-medium text-slate-600">Fee: ₨${p.Fee || 0}</span>
-          </div>
-        `;
-        c.appendChild(card);
-      });
       lucide.createIcons();
-    }
-
-    function fillPatientToForm(p) {
-      document.getElementById("pId").value = p.PatientID || '';
-      document.getElementById("pName").value = p.Name || '';
-      document.getElementById("pGender").value = p.Gender || 'Male';
-      document.getElementById("pAge").value = p.Age || '';
-      document.getElementById("pCnic").value = p.CNIC || '';
-      document.getElementById("pPhone").value = p.Phone || '';
-      document.getElementById("pAddress").value = p.Address || '';
-      document.getElementById("cAllergies").value = p.Allergies || '';
-      document.getElementById("cHistory").value = p.History || '';
-      window.scrollTo({ top: 100, behavior: 'smooth' });
-    }
-
-    function handleSearch() {
-      const q = document.getElementById("patientSearchInput").value.toLowerCase().trim();
-      if (!q) {
-        renderPatients(allPatients);
-        return;
-      }
-      const filtered = allPatients.filter(p => 
-        (p.PatientID && p.PatientID.toLowerCase().includes(q)) ||
-        (p.Name && p.Name.toLowerCase().includes(q)) ||
-        (p.CNIC && p.CNIC.includes(q))
-      );
-      renderPatients(filtered);
-    }
-
-    function clearSearch() {
-      document.getElementById("patientSearchInput").value = "";
-      renderPatients(allPatients);
-    }
-
-    function calculateStats(list) {
-      const now = new Date();
-      const todayStr = now.toISOString().slice(0, 10);
-      const currentMonth = now.getMonth();
-      const currentYear = now.getFullYear();
-
-      let tVisits = 0, mVisits = 0, tFee = 0, mFee = 0;
-
-      list.forEach(p => {
-        const fee = Number(p.Fee) || 0;
-        const discount = Number(p.Discount) || 0;
-        const netFee = Math.max(0, fee - discount);
-
-        if (p.Date) {
-          const pDate = new Date(p.Date);
-          if (p.Date.toString().startsWith(todayStr)) {
-            tVisits++;
-            tFee += netFee;
-          }
-          if (pDate.getMonth() === currentMonth && pDate.getFullYear() === currentYear) {
-            mVisits++;
-            mFee += netFee;
-          }
-        }
-      });
-
-      document.getElementById("statTodayVisits").innerText = tVisits;
-      document.getElementById("statMonthVisits").innerText = mVisits;
-      document.getElementById("statTodayFee").innerText = `₨ ${tFee.toLocaleString()}`;
-      document.getElementById("statMonthFee").innerText = `₨ ${mFee.toLocaleString()}`;
     }
 
     async function saveClinicSettings(e) {
@@ -711,10 +918,46 @@
       loadInitialData();
     }
 
-    async function addDoctor(e) {
+    async function loadDoctors() {
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=getDoctors`);
+        const json = await res.json();
+        const tbody = document.getElementById("doctorTableBody");
+        tbody.innerHTML = "";
+
+        if (json.status === "success") {
+          allDoctors = json.data;
+          allDoctors.forEach(d => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td class="p-3 font-bold text-slate-800">${d.name}</td>
+              <td class="p-3 font-mono text-slate-600">${d.username}</td>
+              <td class="p-3 font-mono text-slate-400">••••••</td>
+              <td class="p-3 text-right space-x-2">
+                <button onclick="editDoctor('${d.username}')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[11px] font-semibold">Edit</button>
+                <button onclick="deleteDoctor('${d.username}')" class="px-2 py-1 bg-red-50 hover:bg-red-100 text-red-600 rounded text-[11px] font-semibold">Remove</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      } catch (err) {}
+    }
+
+    function editDoctor(username) {
+      const doc = allDoctors.find(d => d.username === username);
+      if (doc) {
+        document.getElementById("docName").value = doc.name;
+        document.getElementById("docUser").value = doc.username;
+        document.getElementById("docPass").value = doc.password;
+        document.getElementById("btnSaveDoctor").innerText = "Update Doctor";
+      }
+    }
+
+    async function saveDoctorCredentials(e) {
       e.preventDefault();
       const payload = {
-        action: "addDoctor",
+        action: "saveDoctor",
         name: document.getElementById("docName").value.trim(),
         username: document.getElementById("docUser").value.trim(),
         password: document.getElementById("docPass").value.trim()
@@ -724,26 +967,56 @@
         headers: { "Content-Type": "text/plain" },
         body: JSON.stringify(payload)
       });
-      alert("Doctor credentials created!");
-      document.getElementById("addDoctorForm").reset();
-      loadDoctorsList();
+      alert("Doctor credentials successfully saved/updated!");
+      document.getElementById("doctorMgmtForm").reset();
+      document.getElementById("btnSaveDoctor").innerText = "Save / Update Doctor";
+      loadDoctors();
     }
 
-    async function loadDoctorsList() {
-      try {
-        const res = await fetch(`${SCRIPT_URL}?action=getDoctors`);
-        const json = await res.json();
-        const container = document.getElementById("doctorList");
-        container.innerHTML = "";
-        if (json.status === "success") {
-          json.data.forEach(d => {
-            container.innerHTML += `<div class="p-2 bg-slate-50 border border-slate-200 rounded-lg flex justify-between">
-              <span class="font-bold text-slate-800">${d.name} (${d.username})</span>
-              <span class="text-brand-600 font-semibold">${d.role}</span>
-            </div>`;
-          });
-        }
-      } catch (err) {}
+    async function deleteDoctor(username) {
+      if (!confirm(`Are you sure you want to remove access for ${username}?`)) return;
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({ action: "deleteDoctor", username: username })
+      });
+      loadDoctors();
+    }
+
+    function renderAdminPatientTable(list) {
+      const tbody = document.getElementById("adminPatientTableBody");
+      tbody.innerHTML = "";
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-400">No patient records found.</td></tr>`;
+        return;
+      }
+      list.forEach(p => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="p-3 font-mono font-bold text-brand-700">${p.PatientID || '-'}</td>
+          <td class="p-3 text-slate-500">${p.Date ? p.Date.toString().slice(0,10) : '-'}</td>
+          <td class="p-3 font-bold text-slate-800">${p.Name || '-'}</td>
+          <td class="p-3">${p.Gender || '-'} / ${p.Age || '-'} Y</td>
+          <td class="p-3 text-slate-600">${p.Phone || '-'}</td>
+          <td class="p-3">${p.Diagnosis || '-'}</td>
+          <td class="p-3 font-semibold text-emerald-600">₨${p.Fee || 0}</td>
+          <td class="p-3 text-right">
+            ${p.DocURL ? `<a href="${p.DocURL}" target="_blank" class="text-brand-600 hover:text-brand-800 font-semibold">Open Rx</a>` : '-'}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterAdminPatientRecords() {
+      const q = document.getElementById("adminPatientSearchInput").value.toLowerCase().trim();
+      const filtered = allPatients.filter(p => 
+        (p.PatientID && p.PatientID.toLowerCase().includes(q)) ||
+        (p.Name && p.Name.toLowerCase().includes(q)) ||
+        (p.Phone && p.Phone.includes(q)) ||
+        (p.CNIC && p.CNIC.includes(q))
+      );
+      renderAdminPatientTable(filtered);
     }
   </script>
 </body>
