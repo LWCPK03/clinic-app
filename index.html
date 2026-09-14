@@ -68,13 +68,18 @@
       <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Username</label>
-          <input type="text" id="loginUsername" required placeholder="admin or doctor" 
+          <input type="text" id="loginUsername" required placeholder="admin or doctor username" 
             class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Password</label>
-          <input type="password" id="loginPassword" required placeholder="••••••••" 
-            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+          <div class="relative flex items-center">
+            <input type="password" id="loginPassword" required placeholder="••••••••" 
+              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm pr-11">
+            <button type="button" onclick="togglePasswordVisibility('loginPassword', 'loginEyeIcon')" class="absolute right-3 p-1 text-slate-400 hover:text-slate-600 focus:outline-none">
+              <i data-lucide="eye" id="loginEyeIcon" class="w-4 h-4"></i>
+            </button>
+          </div>
         </div>
         <button type="submit" id="loginBtn" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-md shadow-brand-200 flex items-center justify-center gap-2 transition cursor-pointer">
           <span>Sign In</span>
@@ -101,10 +106,10 @@
       <div class="flex items-center gap-3">
         <span id="roleBadge" class="hidden sm:inline-block text-[11px] font-semibold text-brand-600 uppercase tracking-wider bg-brand-50 px-2.5 py-1 rounded-md">Logged In</span>
         
-        <!-- Navigation Buttons -->
+        <!-- Navigation Buttons: Admin Panel button ONLY appears for role==='Admin' -->
         <div class="flex items-center bg-slate-100 p-1 rounded-xl text-xs font-semibold">
           <button onclick="switchMainTab('doctor')" id="navBtnDoctor" class="px-3 py-1.5 rounded-lg bg-white shadow-xs text-slate-900">Consultation</button>
-          <button onclick="switchMainTab('reports')" id="navBtnReports" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900">Reports & Analytics</button>
+          <button onclick="switchMainTab('reports')" id="navBtnReports" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900">Reports</button>
           <button onclick="switchMainTab('admin')" id="navBtnAdmin" class="hidden px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900">Admin Panel</button>
         </div>
 
@@ -413,7 +418,6 @@
           <p class="text-xs text-slate-500">Filter clinical and financial audit records by date range</p>
         </div>
 
-        <!-- One-Click Print Report Button -->
         <button onclick="printFilteredReport()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-200 flex items-center gap-2 transition cursor-pointer">
           <i data-lucide="printer" class="w-4 h-4"></i>
           <span>Print / Save PDF Report</span>
@@ -563,7 +567,7 @@
       </form>
     </div>
 
-    <!-- SUB-TAB 2: DOCTORS -->
+    <!-- SUB-TAB 2: DOCTORS WITH PASSWORD EYE TOGGLE -->
     <div id="subTabDoctors" class="hidden space-y-6">
       <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
         <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
@@ -580,7 +584,12 @@
           </div>
           <div>
             <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Password</label>
-            <input type="text" id="docPass" required placeholder="••••••••" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+            <div class="relative flex items-center">
+              <input type="password" id="docPass" required placeholder="••••••••" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs pr-9">
+              <button type="button" onclick="togglePasswordVisibility('docPass', 'docEyeIcon')" class="absolute right-2 p-1 text-slate-400 hover:text-slate-600 focus:outline-none">
+                <i data-lucide="eye" id="docEyeIcon" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
           </div>
           <div class="sm:col-span-3 flex justify-end">
             <button type="submit" id="btnSaveDoctor" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs rounded-xl transition">
@@ -637,9 +646,8 @@
 
   </main>
 
-  <!-- ================= PRINTABLE A4 REPORT CONTAINER (Hidden until Print is triggered) ================= -->
+  <!-- ================= PRINTABLE A4 REPORT CONTAINER ================= -->
   <div id="printableReportArea" class="hidden bg-white text-slate-900 font-sans p-6">
-    <!-- Header -->
     <div class="flex items-center justify-between border-b-2 border-slate-900 pb-4 mb-4">
       <div class="flex items-center gap-4">
         <img id="printReportLogo" class="w-16 h-16 object-contain hidden" alt="Logo">
@@ -656,7 +664,7 @@
       </div>
     </div>
 
-    <!-- Summary KPI Box -->
+    <!-- Summary Box -->
     <div class="grid grid-cols-6 gap-2 border border-slate-300 p-3 rounded-lg mb-4 text-center bg-slate-50 text-xs">
       <div>
         <span class="text-[10px] font-bold text-slate-500 uppercase block">Patients</span>
@@ -684,7 +692,7 @@
       </div>
     </div>
 
-    <!-- Detailed Ledger Table -->
+    <!-- Ledger Table -->
     <table class="w-full text-left text-[11px] border border-slate-300 mb-6">
       <thead class="bg-slate-100 text-slate-900 border-b border-slate-300 font-bold">
         <tr>
@@ -701,7 +709,6 @@
       <tbody id="printTableBody" class="divide-y divide-slate-200"></tbody>
     </table>
 
-    <!-- Signature Footer -->
     <div class="flex justify-between items-end pt-8 text-xs border-t border-slate-200">
       <div>
         <p class="text-[10px] text-slate-400">Generated securely via BlueCare Clinic Management System</p>
@@ -727,7 +734,6 @@
       lucide.createIcons();
       addMedicineRow();
 
-      // Fast LocalStorage Cache Init
       const cachedSettings = localStorage.getItem("clinicSettings");
       if (cachedSettings) {
         try {
@@ -751,6 +757,20 @@
         activateUserSession();
       }
     });
+
+    // Password Visibility Toggle
+    function togglePasswordVisibility(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (input.type === "password") {
+        input.type = "text";
+        icon.setAttribute("data-lucide", "eye-off");
+      } else {
+        input.type = "password";
+        icon.setAttribute("data-lucide", "eye");
+      }
+      lucide.createIcons();
+    }
 
     // Navigation Switcher
     function switchMainTab(tab) {
@@ -779,14 +799,15 @@
         populateDoctorFilterOptions();
         applyReportFilters();
       } else if (tab === 'admin') {
-        admP.classList.remove("hidden");
-        btnAdm.className = "px-3 py-1.5 rounded-lg bg-white shadow-xs text-slate-900";
-        switchAdminSubTab('settings');
+        if (currentUser && currentUser.role === "Admin") {
+          admP.classList.remove("hidden");
+          btnAdm.className = "px-3 py-1.5 rounded-lg bg-white shadow-xs text-slate-900";
+          switchAdminSubTab('settings');
+        }
       }
       lucide.createIcons();
     }
 
-    // Google Drive Thumbnail Converter
     function formatDriveImageUrl(url) {
       if (!url) return "";
       url = url.trim();
@@ -811,7 +832,6 @@
       icon.classList.remove("hidden");
     }
 
-    // Authentication
     async function handleLogin(e) {
       e.preventDefault();
       const btn = document.getElementById("loginBtn");
@@ -847,16 +867,21 @@
       }
     }
 
+    // Role Based Session Control: STRICT RESTRICTION FOR DOCTOR
     function activateUserSession() {
       document.getElementById("authScreen").classList.add("hidden");
       document.getElementById("roleBadge").innerText = `${currentUser.name} (${currentUser.role})`;
       
+      const adminBtn = document.getElementById("navBtnAdmin");
+      const docFilterBox = document.getElementById("doctorFilterBox");
+
       if (currentUser.role === "Admin") {
-        document.getElementById("navBtnAdmin").classList.remove("hidden");
-        document.getElementById("doctorFilterBox").classList.remove("hidden");
+        adminBtn.classList.remove("hidden");
+        if (docFilterBox) docFilterBox.classList.remove("hidden");
       } else {
-        document.getElementById("navBtnAdmin").classList.add("hidden");
-        document.getElementById("doctorFilterBox").classList.add("hidden");
+        // DOCTOR RESTRICTION: Hide Admin Panel Completely
+        adminBtn.classList.add("hidden");
+        if (docFilterBox) docFilterBox.classList.add("hidden");
       }
       loadInitialData();
     }
@@ -866,10 +891,9 @@
       window.location.reload();
     }
 
-    // Dynamic Medicine Rows with Lock Labels
     function addMedicineRow() {
       const container = document.getElementById("medicinesContainer");
-      const rowId = "med_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6);
+      const rowId = "med_" + Date.now();
       const div = document.createElement("div");
       div.id = rowId;
       div.className = "grid grid-cols-12 gap-2 items-center bg-slate-50/70 p-2 rounded-xl border border-slate-100";
@@ -915,7 +939,6 @@
       document.getElementById("fRemaining").value = `Rs ${remaining}`;
     }
 
-    // Patient Consultation Flow
     function selectPatientMode(mode) {
       const newCard = document.getElementById("modeCardNew");
       const extCard = document.getElementById("modeCardExisting");
@@ -1039,7 +1062,6 @@
       formSec.scrollIntoView({ behavior: 'smooth' });
     }
 
-    // Background Data Loader
     async function loadInitialData() {
       try {
         const sRes = await fetch(`${SCRIPT_URL}?action=getSettings`);
@@ -1135,7 +1157,7 @@
       document.getElementById("statMonthFee").innerText = `Rs ${mFee.toLocaleString()}`;
     }
 
-    // ================= ADVANCED REPORTS & ANALYTICS ENGINE =================
+    // Reports Engine
     function handlePeriodChange() {
       const period = document.getElementById("reportPeriodSelect").value;
       const fromBox = document.getElementById("customDateFromContainer");
@@ -1152,6 +1174,7 @@
 
     function populateDoctorFilterOptions() {
       const docSelect = document.getElementById("reportDoctorSelect");
+      if (!docSelect) return;
       const currentVal = docSelect.value;
       docSelect.innerHTML = `<option value="ALL">All Attending Doctors</option>`;
 
@@ -1171,19 +1194,18 @@
 
     function applyReportFilters() {
       const period = document.getElementById("reportPeriodSelect").value;
-      const docFilter = document.getElementById("reportDoctorSelect").value;
+      const docSelect = document.getElementById("reportDoctorSelect");
+      const docFilter = docSelect ? docSelect.value : "ALL";
       const now = new Date();
 
       let filtered = allPatients.slice();
 
-      // Doctor filter
       if (currentUser && currentUser.role === "Doctor") {
         filtered = filtered.filter(p => p.DoctorName === currentUser.name);
       } else if (docFilter !== "ALL") {
         filtered = filtered.filter(p => p.DoctorName === docFilter);
       }
 
-      // Date filtering
       if (period === "today") {
         const todayStr = now.toISOString().slice(0, 10);
         filtered = filtered.filter(p => {
@@ -1236,7 +1258,6 @@
 
     function renderReportData(list, period) {
       let totalConsult = 0, totalMeds = 0, totalDisc = 0, totalPaid = 0, totalRem = 0;
-
       const tbody = document.getElementById("reportTableBody");
       tbody.innerHTML = "";
 
@@ -1281,7 +1302,6 @@
       document.getElementById("reportTableSubtitle").innerText = `Report Breakdown (${period.toUpperCase()})`;
     }
 
-    // Print & PDF Generator
     function printFilteredReport() {
       if (currentFilteredRecords.length === 0) {
         alert("No records found for the selected filter!");
@@ -1289,7 +1309,8 @@
       }
 
       const period = document.getElementById("reportPeriodSelect").value.toUpperCase();
-      const docFilter = document.getElementById("reportDoctorSelect").value;
+      const docSelect = document.getElementById("reportDoctorSelect");
+      const docFilter = docSelect ? docSelect.value : (currentUser ? currentUser.name : "ALL");
       const now = new Date();
 
       document.getElementById("printReportGeneratedDate").innerText = `Printed: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
@@ -1333,7 +1354,6 @@
       document.getElementById("pRepPaid").innerText = `Rs ${totalPaid.toLocaleString()}`;
       document.getElementById("pRepRem").innerText = `Rs ${totalRem.toLocaleString()}`;
 
-      // Open print preview
       window.print();
     }
 
@@ -1428,7 +1448,7 @@
       }
     }
 
-    // Admin Panel Sub-tabs
+    // Admin Panel Actions
     function switchAdminSubTab(tab) {
       const secS = document.getElementById("subTabSettings");
       const secD = document.getElementById("subTabDoctors");
