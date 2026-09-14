@@ -70,7 +70,6 @@
   <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <!-- Logo Slot: Supports Mobile & PC Direct Image Embedding -->
         <div id="clinicLogoSlot" class="w-12 h-12 bg-brand-50 border border-brand-100 rounded-xl flex items-center justify-center overflow-hidden p-1 shadow-xs">
           <i data-lucide="activity" class="w-6 h-6 text-brand-600" id="defaultLogoIcon"></i>
           <img id="customLogoImg" class="w-full h-full object-contain hidden" alt="Clinic Logo" onerror="handleLogoError()" />
@@ -118,14 +117,14 @@
       <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
         <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Today's Total Paid</span>
         <div class="flex items-baseline justify-between mt-1">
-          <span id="statTodayFee" class="text-2xl font-black text-emerald-600">₨ 0</span>
+          <span id="statTodayFee" class="text-2xl font-black text-emerald-600">Rs 0</span>
           <i data-lucide="wallet" class="w-5 h-5 text-emerald-200"></i>
         </div>
       </div>
       <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
         <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Monthly Total Paid</span>
         <div class="flex items-baseline justify-between mt-1">
-          <span id="statMonthFee" class="text-2xl font-black text-slate-800">₨ 0</span>
+          <span id="statMonthFee" class="text-2xl font-black text-slate-800">Rs 0</span>
           <i data-lucide="banknote" class="w-5 h-5 text-slate-300"></i>
         </div>
       </div>
@@ -346,17 +345,17 @@
                 class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800">
             </div>
 
-            <!-- Medicine Price Total (Auto Calculated) -->
+            <!-- Medicine Price Total -->
             <div>
               <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Medicine Charges</label>
-              <input type="text" id="fMedicineTotal" readonly value="Rs. 0" 
+              <input type="text" id="fMedicineTotal" readonly value="Rs 0" 
                 class="w-full px-3 py-2 bg-slate-100 border border-slate-200 text-slate-700 font-bold rounded-xl text-xs">
             </div>
 
             <!-- Total Gross Fee -->
             <div>
               <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Total Fee (Gross)</label>
-              <input type="text" id="fGrossTotal" readonly value="Rs. 1000" 
+              <input type="text" id="fGrossTotal" readonly value="Rs 1000" 
                 class="w-full px-3 py-2 bg-slate-100 border border-slate-200 text-slate-900 font-bold rounded-xl text-xs">
             </div>
 
@@ -370,7 +369,7 @@
             <!-- Payable Amount (Net) -->
             <div>
               <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Payable Amount</label>
-              <input type="text" id="fNetPayable" readonly value="Rs. 1000" 
+              <input type="text" id="fNetPayable" readonly value="Rs 1000" 
                 class="w-full px-3 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold rounded-xl text-xs">
             </div>
 
@@ -384,7 +383,7 @@
             <!-- Remaining / Balance -->
             <div>
               <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Remaining Balance</label>
-              <input type="text" id="fRemaining" readonly value="Rs. 0" 
+              <input type="text" id="fRemaining" readonly value="Rs 0" 
                 class="w-full px-3 py-2 bg-rose-50 border border-rose-200 text-rose-700 font-bold rounded-xl text-xs">
             </div>
 
@@ -545,19 +544,23 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       lucide.createIcons();
-      resetMedicineRows();
+      addMedicineRow();
 
-      // FAST CACHE INITIALIZATION (Zero Latency Display)
+      // FAST CACHE INITIALIZATION
       const cachedSettings = localStorage.getItem("clinicSettings");
       if (cachedSettings) {
-        clinicSettings = JSON.parse(cachedSettings);
-        applySettings(clinicSettings);
+        try {
+          clinicSettings = JSON.parse(cachedSettings);
+          applySettings(clinicSettings);
+        } catch(e){}
       }
       const cachedPatients = localStorage.getItem("clinicPatients");
       if (cachedPatients) {
-        allPatients = JSON.parse(cachedPatients);
-        calculateStats(allPatients);
-        renderAdminPatientTable(allPatients);
+        try {
+          allPatients = JSON.parse(cachedPatients);
+          calculateStats(allPatients);
+          renderAdminPatientTable(allPatients);
+        } catch(e){}
       }
 
       const savedUser = localStorage.getItem("clinicUser");
@@ -567,20 +570,6 @@
       }
     });
 
-    // Helper: Convert Google Doc URLs to Export formats (PDF, DOCX)
-    function getDocExportUrl(docUrl, format) {
-      if (!docUrl) return "";
-      let base = docUrl.trim();
-      if (base.includes("/edit")) {
-        return base.replace(/\/edit.*$/, `/export?format=${format}`);
-      } else if (base.includes("/view")) {
-        return base.replace(/\/view.*$/, `/export?format=${format}`);
-      } else {
-        return base.replace(/\/+$/, '') + `/export?format=${format}`;
-      }
-    }
-
-    // Universal Mobile/PC Direct Image Link Converter
     function formatDriveImageUrl(url) {
       if (!url) return "";
       url = url.trim();
@@ -605,14 +594,6 @@
       icon.classList.remove("hidden");
     }
 
-    // Reset Medicine Rows
-    function resetMedicineRows() {
-      const container = document.getElementById("medicinesContainer");
-      container.innerHTML = "";
-      addMedicineRow();
-    }
-
-    // Dynamic Medicine Row with permanent 'Days' & 'Rs.' labels
     function addMedicineRow() {
       const container = document.getElementById("medicinesContainer");
       const rowId = "med_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6);
@@ -623,13 +604,11 @@
         <input type="text" placeholder="Drug name & dose (e.g. Tab Panadol 500mg)" class="col-span-12 sm:col-span-5 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs med-name">
         <input type="text" placeholder="1+0+1" class="col-span-4 sm:col-span-2 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs med-freq">
         
-        <!-- Permanent Days Label -->
         <div class="col-span-4 sm:col-span-2 flex items-center bg-white border border-slate-200 rounded-lg overflow-hidden">
           <input type="number" placeholder="5" class="w-full px-2 py-1.5 text-xs text-center med-duration focus:outline-none">
           <span class="bg-slate-100 px-2 py-1.5 text-[11px] font-semibold text-slate-500 border-l border-slate-200">Days</span>
         </div>
 
-        <!-- Permanent Rs. Label -->
         <div class="col-span-3 sm:col-span-2 flex items-center bg-white border border-slate-200 rounded-lg overflow-hidden">
           <span class="bg-slate-100 px-2 py-1.5 text-[11px] font-semibold text-slate-500 border-r border-slate-200">Rs.</span>
           <input type="number" placeholder="250" oninput="calculateFullBilling()" class="w-full px-2 py-1.5 text-xs text-right med-price focus:outline-none">
@@ -643,31 +622,24 @@
       lucide.createIcons();
     }
 
-    // Complete Financial Engine
     function calculateFullBilling() {
-      // 1. Calculate sum of medicines
       let medTotal = 0;
       document.querySelectorAll(".med-price").forEach(inp => {
         medTotal += Number(inp.value) || 0;
       });
-      document.getElementById("fMedicineTotal").value = `Rs. ${medTotal}`;
+      document.getElementById("fMedicineTotal").value = `Rs ${medTotal}`;
 
-      // 2. Consultation fee
       const cFee = Number(document.getElementById("fConsultation").value) || 0;
-
-      // 3. Gross Total
       const gross = cFee + medTotal;
-      document.getElementById("fGrossTotal").value = `Rs. ${gross}`;
+      document.getElementById("fGrossTotal").value = `Rs ${gross}`;
 
-      // 4. Discount & Net Payable
       const discount = Number(document.getElementById("fDiscount").value) || 0;
       const payable = Math.max(0, gross - discount);
-      document.getElementById("fNetPayable").value = `Rs. ${payable}`;
+      document.getElementById("fNetPayable").value = `Rs ${payable}`;
 
-      // 5. Paid & Remaining
       const paid = Number(document.getElementById("fPaidAmount").value) || 0;
       const remaining = Math.max(0, payable - paid);
-      document.getElementById("fRemaining").value = `Rs. ${remaining}`;
+      document.getElementById("fRemaining").value = `Rs ${remaining}`;
     }
 
     async function handleLogin(e) {
@@ -756,7 +728,6 @@
         document.getElementById("clinicEntryForm").reset();
         document.getElementById("pId").readOnly = false;
         document.getElementById("pName").readOnly = false;
-        resetMedicineRows();
         calculateFullBilling();
       } else {
         extCard.classList.add("border-brand-500", "bg-brand-50/40");
@@ -827,9 +798,9 @@
 
       patientVisits.forEach(v => {
         const tr = document.createElement("tr");
-        const netPay = v.netPayable || v.Fee || 0;
-        const paid = v.paidAmount || v.Fee || 0;
-        const remaining = v.remainingAmount || 0;
+        const netPay = v.NetPayable ?? v.netPayable ?? v.Fee ?? 0;
+        const paid = v.PaidAmount ?? v.paidAmount ?? v.Fee ?? 0;
+        const remaining = v.RemainingAmount ?? v.remainingAmount ?? 0;
 
         tr.innerHTML = `
           <td class="p-3 font-medium text-slate-800">${v.Date ? v.Date.toString().slice(0, 16) : 'N/A'}</td>
@@ -839,16 +810,16 @@
             <p class="text-[10px] text-slate-500">${v.Symptoms || ''}</p>
           </td>
           <td class="p-3">
-            <span class="font-bold text-emerald-600">₨ ${paid}</span>
-            <span class="text-[10px] text-slate-400 block">Total: ₨ ${netPay}</span>
+            <span class="font-bold text-emerald-600">Rs ${paid}</span>
+            <span class="text-[10px] text-slate-400 block">Total: Rs ${netPay}</span>
           </td>
-          <td class="p-3 font-bold ${remaining > 0 ? 'text-rose-600' : 'text-slate-400'}">
-            ₨ ${remaining}
+          <td class="p-3 font-bold ${Number(remaining) > 0 ? 'text-rose-600' : 'text-slate-400'}">
+            Rs ${remaining}
           </td>
           <td class="p-3 text-right space-x-1 whitespace-nowrap">
             ${v.DocURL ? `<a href="${v.DocURL}" target="_blank" class="px-2 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 rounded-lg text-xs font-semibold inline-flex items-center gap-1">Docs</a>` : ''}
-            ${v.DocURL ? `<a href="${getDocExportUrl(v.DocURL, 'pdf')}" target="_blank" class="px-2 py-1 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-xs font-semibold inline-flex items-center gap-1"><i data-lucide="file-down" class="w-3 h-3"></i> PDF</a>` : ''}
-            ${v.DocURL ? `<a href="${getDocExportUrl(v.DocURL, 'docx')}" target="_blank" class="px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-semibold inline-flex items-center gap-1"><i data-lucide="file-text" class="w-3 h-3"></i> Word</a>` : ''}
+            ${v.DocURL ? `<a href="${v.DocURL.replace('/edit', '/export?format=pdf')}" target="_blank" class="px-2 py-1 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-xs font-semibold inline-flex items-center gap-1"><i data-lucide="file-down" class="w-3 h-3"></i> PDF</a>` : ''}
+            ${v.DocURL ? `<a href="${v.DocURL.replace('/edit', '/export?format=docx')}" target="_blank" class="px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-semibold inline-flex items-center gap-1"><i data-lucide="file-text" class="w-3 h-3"></i> Word</a>` : ''}
           </td>
         `;
         tBody.appendChild(tr);
@@ -874,12 +845,10 @@
     function revealEncounterForm() {
       const formSec = document.getElementById("patientFormSection");
       formSec.classList.remove("hidden");
-      resetMedicineRows();
       calculateFullBilling();
       formSec.scrollIntoView({ behavior: 'smooth' });
     }
 
-    // High Speed Fetching with LocalStorage Sync
     async function loadInitialData() {
       try {
         const sRes = await fetch(`${SCRIPT_URL}?action=getSettings`);
@@ -936,35 +905,49 @@
       }
     }
 
+    // UPDATED & BULLETPROOF KPI CALCULATION FUNCTION
     function calculateStats(list) {
       const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const todayStr = `${year}-${month}-${day}`;
       const currentMonth = now.getMonth();
       const currentYear = now.getFullYear();
 
       let tVisits = 0, mVisits = 0, tFee = 0, mFee = 0;
 
       list.forEach(p => {
-        const paid = Number(p.paidAmount) || Number(p.Fee) || 0;
+        // Multi-alias support for PaidAmount
+        let rawVal = p.PaidAmount ?? p.paidAmount ?? p.TotalPaid ?? p.totalPaid ?? p.NetPayable ?? p.Fee ?? 0;
+        
+        if (typeof rawVal === 'string') {
+          rawVal = rawVal.replace(/[^0-9.]/g, '');
+        }
+        const paid = Number(rawVal) || 0;
 
         if (p.Date) {
+          const dStr = p.Date.toString();
           const pDate = new Date(p.Date);
-          if (!isNaN(pDate.getTime())) {
-            if (pDate.toDateString() === now.toDateString()) {
-              tVisits++;
-              tFee += paid;
-            }
-            if (pDate.getMonth() === currentMonth && pDate.getFullYear() === currentYear) {
-              mVisits++;
-              mFee += paid;
-            }
+
+          // Check Today's Visit
+          if (dStr.startsWith(todayStr) || (pDate.getDate() === now.getDate() && pDate.getMonth() === currentMonth && pDate.getFullYear() === currentYear)) {
+            tVisits++;
+            tFee += paid;
+          }
+
+          // Check Monthly Visit
+          if (pDate.getMonth() === currentMonth && pDate.getFullYear() === currentYear) {
+            mVisits++;
+            mFee += paid;
           }
         }
       });
 
       document.getElementById("statTodayVisits").innerText = tVisits;
       document.getElementById("statMonthVisits").innerText = mVisits;
-      document.getElementById("statTodayFee").innerText = `₨ ${tFee.toLocaleString()}`;
-      document.getElementById("statMonthFee").innerText = `₨ ${mFee.toLocaleString()}`;
+      document.getElementById("statTodayFee").innerText = `Rs ${tFee.toLocaleString()}`;
+      document.getElementById("statMonthFee").innerText = `Rs ${mFee.toLocaleString()}`;
     }
 
     async function savePatientRecord(e) {
@@ -1043,14 +1026,13 @@
             }
           }
           document.getElementById("clinicEntryForm").reset();
-          resetMedicineRows();
           document.getElementById("patientFormSection").classList.add("hidden");
           loadInitialData();
         } else {
           alert(result.message || "Failed to save patient record.");
         }
       } catch (err) {
-        alert("Failed to communicate with Google Drive/Sheet. Please check connection.");
+        alert("Failed to communicate with Google Drive/Sheet.");
       } finally {
         btn.disabled = false;
         btn.innerHTML = `<i data-lucide="cloud-upload" class="w-4 h-4"></i><span>Save Visit & Generate Prescription</span>`;
@@ -1194,9 +1176,9 @@
         return;
       }
       list.forEach(p => {
-        const netPay = p.netPayable || p.Fee || 0;
-        const paid = p.paidAmount || p.Fee || 0;
-        const rem = p.remainingAmount || 0;
+        const netPay = p.NetPayable ?? p.netPayable ?? p.Fee ?? 0;
+        const paid = p.PaidAmount ?? p.paidAmount ?? p.Fee ?? 0;
+        const rem = p.RemainingAmount ?? p.remainingAmount ?? 0;
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -1206,16 +1188,16 @@
           <td class="p-3">${p.Gender || '-'} / ${p.Age || '-'} Y</td>
           <td class="p-3 text-slate-600">${p.Phone || '-'}</td>
           <td class="p-3">
-            <span class="font-bold text-emerald-600">₨ ${paid}</span>
-            <span class="text-[10px] text-slate-400 block">Total: ₨ ${netPay}</span>
+            <span class="font-bold text-emerald-600">Rs ${paid}</span>
+            <span class="text-[10px] text-slate-400 block">Total: Rs ${netPay}</span>
           </td>
-          <td class="p-3 font-bold ${rem > 0 ? 'text-rose-600' : 'text-slate-400'}">
-            ₨ ${rem}
+          <td class="p-3 font-bold ${Number(rem) > 0 ? 'text-rose-600' : 'text-slate-400'}">
+            Rs ${rem}
           </td>
           <td class="p-3 text-right space-x-1 whitespace-nowrap">
             ${p.DocURL ? `<a href="${p.DocURL}" target="_blank" class="px-2 py-1 bg-brand-50 text-brand-700 rounded text-xs font-semibold">Doc</a>` : ''}
-            ${p.DocURL ? `<a href="${getDocExportUrl(p.DocURL, 'pdf')}" target="_blank" class="px-2 py-1 bg-red-50 text-red-600 rounded text-xs font-semibold">PDF</a>` : ''}
-            ${p.DocURL ? `<a href="${getDocExportUrl(p.DocURL, 'docx')}" target="_blank" class="px-2 py-1 bg-blue-50 text-blue-600 rounded text-xs font-semibold">Word</a>` : ''}
+            ${p.DocURL ? `<a href="${p.DocURL.replace('/edit', '/export?format=pdf')}" target="_blank" class="px-2 py-1 bg-red-50 text-red-600 rounded text-xs font-semibold">PDF</a>` : ''}
+            ${p.DocURL ? `<a href="${p.DocURL.replace('/edit', '/export?format=docx')}" target="_blank" class="px-2 py-1 bg-blue-50 text-blue-600 rounded text-xs font-semibold">Word</a>` : ''}
           </td>
         `;
         tbody.appendChild(tr);
