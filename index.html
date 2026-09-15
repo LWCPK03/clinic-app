@@ -89,33 +89,40 @@
     </div>
   </div>
 
-  <!-- ================= TOP NAVIGATION BAR ================= -->
+  <!-- ================= TOP NAVIGATION BAR (PC & MOBILE OPTIMIZED) ================= -->
   <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs no-print">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div id="clinicLogoSlot" class="w-12 h-12 bg-brand-50 border border-brand-100 rounded-xl flex items-center justify-center overflow-hidden p-1 shadow-xs">
-          <i data-lucide="activity" class="w-6 h-6 text-brand-600" id="defaultLogoIcon"></i>
+    <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
+      <!-- Clinic Brand Header -->
+      <div class="flex items-center gap-2.5">
+        <div id="clinicLogoSlot" class="w-10 h-10 bg-brand-50 border border-brand-100 rounded-xl flex items-center justify-center overflow-hidden p-1 shadow-xs">
+          <i data-lucide="activity" class="w-5 h-5 text-brand-600" id="defaultLogoIcon"></i>
           <img id="customLogoImg" class="w-full h-full object-contain hidden" alt="Clinic Logo" onerror="handleLogoError()" />
         </div>
         <div>
-          <h1 id="topClinicName" class="font-bold text-lg text-slate-900 leading-tight">Clinic Portal</h1>
-          <p id="topClinicDetails" class="text-[11px] text-slate-500 font-medium"></p>
+          <h1 id="topClinicName" class="font-bold text-sm sm:text-base text-slate-900 leading-tight">Clinic Portal</h1>
+          <p id="topClinicDetails" class="text-[10px] text-slate-500 font-medium truncate max-w-[180px] sm:max-w-xs"></p>
         </div>
       </div>
 
-      <div class="flex items-center gap-3">
-        <span id="roleBadge" class="hidden sm:inline-block text-[11px] font-semibold text-brand-600 uppercase tracking-wider bg-brand-50 px-2.5 py-1 rounded-md">Logged In</span>
-        
-        <!-- Navigation Buttons: Admin Panel button ONLY appears for role==='Admin' -->
+      <!-- User Information Badge & Action Group (Always Visible on PC & Mobile) -->
+      <div class="flex items-center gap-2">
+        <!-- Navigation Buttons -->
         <div class="flex items-center bg-slate-100 p-1 rounded-xl text-xs font-semibold">
-          <button onclick="switchMainTab('doctor')" id="navBtnDoctor" class="px-3 py-1.5 rounded-lg bg-white shadow-xs text-slate-900">Consultation</button>
-          <button onclick="switchMainTab('reports')" id="navBtnReports" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900">Reports</button>
-          <button onclick="switchMainTab('admin')" id="navBtnAdmin" class="hidden px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900">Admin Panel</button>
+          <button onclick="switchMainTab('doctor')" id="navBtnDoctor" class="px-2.5 sm:px-3 py-1.5 rounded-lg bg-white shadow-xs text-slate-900">Consult</button>
+          <button onclick="switchMainTab('reports')" id="navBtnReports" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900">Reports</button>
+          <button onclick="switchMainTab('admin')" id="navBtnAdmin" class="hidden px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900">Admin</button>
         </div>
 
-        <button onclick="logout()" title="Logout" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition">
-          <i data-lucide="log-out" class="w-5 h-5"></i>
-        </button>
+        <!-- Logged-in User Chip with Logout Button -->
+        <div class="flex items-center bg-brand-50 border border-brand-100 rounded-xl py-1 px-2.5 gap-2">
+          <div class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span id="topUserNameText" class="text-xs font-bold text-brand-900 max-w-[100px] sm:max-w-none truncate">User</span>
+          </div>
+          <button onclick="logout()" title="Sign Out" class="p-1 text-slate-400 hover:text-rose-600 rounded-lg transition">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
       </div>
     </div>
   </header>
@@ -149,7 +156,7 @@
       <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
         <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Monthly Total Paid</span>
         <div class="flex items-baseline justify-between mt-1">
-          <span id="statMonthFee" class="text-2xl font-black text-slate-800">Rs 0</span>
+          <span id="statMonthFee" class="text-2xl font-black text-slate-800">0</span>
           <i data-lucide="banknote" class="w-5 h-5 text-slate-300"></i>
         </div>
       </div>
@@ -217,7 +224,7 @@
                 <th class="p-3">Doctor</th>
                 <th class="p-3">Diagnosis</th>
                 <th class="p-3">Total / Paid</th>
-                <th class="p-3">Remaining</th>
+                <th class="p-3">Attached Report</th>
                 <th class="p-3 text-right">Prescription Prints</th>
               </tr>
             </thead>
@@ -271,6 +278,20 @@
               <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Residential Address</label>
               <input type="text" id="pAddress" placeholder="Town, City" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm">
             </div>
+          </div>
+        </div>
+
+        <!-- NEW: Patient Previous Medical Reports / Documents Upload Box -->
+        <div class="pt-4 border-t border-slate-100">
+          <h3 class="text-sm font-bold text-brand-900 uppercase tracking-wider flex items-center gap-2 mb-2">
+            <i data-lucide="paperclip" class="w-4 h-4 text-brand-600"></i> Attach Previous Reports (Images / PDF / Docs)
+          </h3>
+          <p class="text-xs text-slate-500 mb-3">Upload patient's existing lab tests, ultrasound, x-ray, or medical prescriptions directly from phone/PC.</p>
+          
+          <div class="flex flex-col sm:flex-row items-center gap-3 p-3 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+            <input type="file" id="patientReportFileInput" accept="image/*,.pdf,.doc,.docx" 
+              class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-600 file:text-white hover:file:bg-brand-700 cursor-pointer">
+            <span id="uploadStatusNotice" class="text-[11px] font-semibold text-slate-400 whitespace-nowrap">Max: 10MB</span>
           </div>
         </div>
 
@@ -398,7 +419,7 @@
 
         <button type="submit" id="savePatientBtn" class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-md shadow-brand-200 flex items-center justify-center gap-2 transition cursor-pointer">
           <i data-lucide="cloud-upload" class="w-4 h-4"></i>
-          <span>Save Visit & Generate Prescription</span>
+          <span>Save Visit & Upload Reports</span>
         </button>
       </form>
     </div>
@@ -446,6 +467,7 @@
           <input type="date" id="reportEndDate" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
         </div>
 
+        <!-- Doctor Filter (Shown only to Admin) -->
         <div id="doctorFilterBox">
           <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Filter by Doctor</label>
           <select id="reportDoctorSelect" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
@@ -505,10 +527,9 @@
               <th class="p-3">Patient ID & Name</th>
               <th class="p-3">Doctor</th>
               <th class="p-3">Diagnosis</th>
-              <th class="p-3">Consultation</th>
-              <th class="p-3">Medicines</th>
               <th class="p-3">Paid</th>
-              <th class="p-3">Remaining</th>
+              <th class="p-3">Balance</th>
+              <th class="p-3">Attached Report</th>
               <th class="p-3 text-right">Rx Link</th>
             </tr>
           </thead>
@@ -519,7 +540,7 @@
 
   </main>
 
-  <!-- ================= TAB 3: ADMIN PANEL ================= -->
+  <!-- ================= TAB 3: ADMIN PANEL (ACCESSIBLE ONLY TO ROLE===ADMIN) ================= -->
   <main id="adminPanel" class="max-w-6xl mx-auto px-4 py-8 flex-1 w-full hidden space-y-6 no-print">
 
     <!-- Admin Sub-Tabs -->
@@ -567,7 +588,7 @@
       </form>
     </div>
 
-    <!-- SUB-TAB 2: DOCTORS WITH PASSWORD EYE TOGGLE -->
+    <!-- SUB-TAB 2: DOCTORS -->
     <div id="subTabDoctors" class="hidden space-y-6">
       <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
         <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
@@ -635,7 +656,7 @@
               <th class="p-3">Gender / Age</th>
               <th class="p-3">Contact</th>
               <th class="p-3">Total / Paid</th>
-              <th class="p-3">Balance</th>
+              <th class="p-3">Attached Report</th>
               <th class="p-3 text-right">Print Options</th>
             </tr>
           </thead>
@@ -664,7 +685,6 @@
       </div>
     </div>
 
-    <!-- Summary Box -->
     <div class="grid grid-cols-6 gap-2 border border-slate-300 p-3 rounded-lg mb-4 text-center bg-slate-50 text-xs">
       <div>
         <span class="text-[10px] font-bold text-slate-500 uppercase block">Patients</span>
@@ -692,7 +712,6 @@
       </div>
     </div>
 
-    <!-- Ledger Table -->
     <table class="w-full text-left text-[11px] border border-slate-300 mb-6">
       <thead class="bg-slate-100 text-slate-900 border-b border-slate-300 font-bold">
         <tr>
@@ -700,8 +719,6 @@
           <th class="p-2 border-r border-slate-200">Patient ID & Name</th>
           <th class="p-2 border-r border-slate-200">Doctor</th>
           <th class="p-2 border-r border-slate-200">Diagnosis</th>
-          <th class="p-2 border-r border-slate-200 text-right">Consult.</th>
-          <th class="p-2 border-r border-slate-200 text-right">Meds</th>
           <th class="p-2 border-r border-slate-200 text-right">Paid</th>
           <th class="p-2 text-right">Balance</th>
         </tr>
@@ -758,7 +775,6 @@
       }
     });
 
-    // Password Visibility Toggle
     function togglePasswordVisibility(inputId, iconId) {
       const input = document.getElementById(inputId);
       const icon = document.getElementById(iconId);
@@ -772,7 +788,6 @@
       lucide.createIcons();
     }
 
-    // Navigation Switcher
     function switchMainTab(tab) {
       const docP = document.getElementById("doctorPanel");
       const repP = document.getElementById("reportsPanel");
@@ -786,22 +801,27 @@
       repP.classList.add("hidden");
       admP.classList.add("hidden");
 
-      btnDoc.className = "px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900";
-      btnRep.className = "px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900";
-      btnAdm.className = "px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900";
+      btnDoc.className = "px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900";
+      btnRep.className = "px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900";
+      btnAdm.className = "px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900";
+
+      // Strict Access Rule: Ensure doctor cannot view admin even if function is called
+      if (currentUser && currentUser.role !== "Admin" && tab === "admin") {
+        tab = "doctor";
+      }
 
       if (tab === 'doctor') {
         docP.classList.remove("hidden");
-        btnDoc.className = "px-3 py-1.5 rounded-lg bg-white shadow-xs text-slate-900";
+        btnDoc.className = "px-2.5 sm:px-3 py-1.5 rounded-lg bg-white shadow-xs text-slate-900";
       } else if (tab === 'reports') {
         repP.classList.remove("hidden");
-        btnRep.className = "px-3 py-1.5 rounded-lg bg-white shadow-xs text-slate-900";
+        btnRep.className = "px-2.5 sm:px-3 py-1.5 rounded-lg bg-white shadow-xs text-slate-900";
         populateDoctorFilterOptions();
         applyReportFilters();
       } else if (tab === 'admin') {
         if (currentUser && currentUser.role === "Admin") {
           admP.classList.remove("hidden");
-          btnAdm.className = "px-3 py-1.5 rounded-lg bg-white shadow-xs text-slate-900";
+          btnAdm.className = "px-2.5 sm:px-3 py-1.5 rounded-lg bg-white shadow-xs text-slate-900";
           switchAdminSubTab('settings');
         }
       }
@@ -867,10 +887,12 @@
       }
     }
 
-    // Role Based Session Control: STRICT RESTRICTION FOR DOCTOR
+    // Role Based Session Control & Top User Display
     function activateUserSession() {
       document.getElementById("authScreen").classList.add("hidden");
-      document.getElementById("roleBadge").innerText = `${currentUser.name} (${currentUser.role})`;
+      
+      // Update Top Header User Name
+      document.getElementById("topUserNameText").innerText = `${currentUser.name} (${currentUser.role})`;
       
       const adminBtn = document.getElementById("navBtnAdmin");
       const docFilterBox = document.getElementById("doctorFilterBox");
@@ -879,7 +901,7 @@
         adminBtn.classList.remove("hidden");
         if (docFilterBox) docFilterBox.classList.remove("hidden");
       } else {
-        // DOCTOR RESTRICTION: Hide Admin Panel Completely
+        // DOCTOR RESTRICTION: Hide Admin Panel completely across all sections
         adminBtn.classList.add("hidden");
         if (docFilterBox) docFilterBox.classList.add("hidden");
       }
@@ -911,7 +933,7 @@
           <input type="number" placeholder="250" oninput="calculateFullBilling()" class="w-full px-2 py-1.5 text-xs text-right med-price focus:outline-none">
         </div>
 
-        <button type="button" onclick="document.getElementById('${rowId}').remove(); calculateFullBilling();" class="col-span-1 text-slate-400 hover:text-red-500 flex justify-center">
+        <button type="button" onclick="document.getElementById('${rowId}').remove(); calculateFullBilling();" class="col-span-1 text-slate-400 hover:text-red-500 flex justify-center cursor-pointer">
           <i data-lucide="trash-2" class="w-4 h-4"></i>
         </button>
       `;
@@ -1022,14 +1044,16 @@
         const tr = document.createElement("tr");
         const netPay = v.NetPayable ?? v.netPayable ?? v.Fee ?? 0;
         const paid = v.PaidAmount ?? v.paidAmount ?? v.Fee ?? 0;
-        const remaining = v.RemainingAmount ?? v.remainingAmount ?? 0;
+        const reportUrl = v.AttachedReportURL || v.attachedReportUrl || "";
 
         tr.innerHTML = `
           <td class="p-3 font-medium text-slate-800">${v.Date ? v.Date.toString().slice(0, 16) : 'N/A'}</td>
           <td class="p-3 text-slate-600">${v.DoctorName || 'Doctor'}</td>
           <td class="p-3 font-bold text-slate-800">${v.Diagnosis || 'None'}</td>
           <td class="p-3"><span class="font-bold text-emerald-600">Rs ${paid}</span><span class="text-[10px] text-slate-400 block">Total: Rs ${netPay}</span></td>
-          <td class="p-3 font-bold ${Number(remaining) > 0 ? 'text-rose-600' : 'text-slate-400'}">Rs ${remaining}</td>
+          <td class="p-3">
+            ${reportUrl && reportUrl.startsWith("http") ? `<a href="${reportUrl}" target="_blank" class="px-2 py-1 bg-teal-50 text-teal-700 hover:bg-teal-100 rounded text-xs font-semibold inline-flex items-center gap-1"><i data-lucide="file-check" class="w-3 h-3"></i> View Report</a>` : '<span class="text-slate-400 text-xs">None</span>'}
+          </td>
           <td class="p-3 text-right space-x-1 whitespace-nowrap">
             ${v.DocURL ? `<a href="${v.DocURL}" target="_blank" class="px-2 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 rounded-lg text-xs font-semibold">Docs</a>` : ''}
             ${v.DocURL ? `<a href="${v.DocURL.replace('/edit', '/export?format=pdf')}" target="_blank" class="px-2 py-1 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-xs font-semibold">PDF</a>` : ''}
@@ -1053,6 +1077,7 @@
 
       document.getElementById("pId").readOnly = true;
       document.getElementById("pName").readOnly = true;
+      lucide.createIcons();
     }
 
     function revealEncounterForm() {
@@ -1157,7 +1182,6 @@
       document.getElementById("statMonthFee").innerText = `Rs ${mFee.toLocaleString()}`;
     }
 
-    // Reports Engine
     function handlePeriodChange() {
       const period = document.getElementById("reportPeriodSelect").value;
       const fromBox = document.getElementById("customDateFromContainer");
@@ -1267,6 +1291,7 @@
         const disc = Number(p.Discount) || 0;
         const paid = Number(p.PaidAmount ?? p.paidAmount ?? p.Fee ?? 0);
         const rem = Number(p.RemainingAmount ?? p.remainingAmount ?? 0);
+        const reportUrl = p.AttachedReportURL || p.attachedReportUrl || "";
 
         totalConsult += consult;
         totalMeds += meds;
@@ -1280,10 +1305,11 @@
           <td class="p-3 font-bold text-slate-900">${p.PatientID} - ${p.Name}</td>
           <td class="p-3 text-slate-600">${p.DoctorName || 'Doctor'}</td>
           <td class="p-3 text-slate-600">${p.Diagnosis || '-'}</td>
-          <td class="p-3 font-medium">Rs ${consult}</td>
-          <td class="p-3 font-medium">Rs ${meds}</td>
           <td class="p-3 font-bold text-emerald-600">Rs ${paid}</td>
           <td class="p-3 font-bold ${rem > 0 ? 'text-rose-600' : 'text-slate-400'}">Rs ${rem}</td>
+          <td class="p-3">
+            ${reportUrl && reportUrl.startsWith("http") ? `<a href="${reportUrl}" target="_blank" class="px-2 py-1 bg-teal-50 text-teal-700 hover:bg-teal-100 rounded text-xs font-semibold inline-flex items-center gap-1">View Report</a>` : '<span class="text-slate-400 text-xs">-</span>'}
+          </td>
           <td class="p-3 text-right">
             ${p.DocURL ? `<a href="${p.DocURL}" target="_blank" class="px-2 py-1 bg-brand-50 text-brand-700 rounded text-xs font-semibold">Rx</a>` : '-'}
           </td>
@@ -1339,8 +1365,6 @@
           <td class="p-2 border-r border-slate-200 font-bold">${p.PatientID} - ${p.Name}</td>
           <td class="p-2 border-r border-slate-200">${p.DoctorName || 'Doctor'}</td>
           <td class="p-2 border-r border-slate-200">${p.Diagnosis || '-'}</td>
-          <td class="p-2 border-r border-slate-200 text-right">${consult}</td>
-          <td class="p-2 border-r border-slate-200 text-right">${meds}</td>
           <td class="p-2 border-r border-slate-200 text-right font-bold">${paid}</td>
           <td class="p-2 text-right font-bold ${rem > 0 ? 'text-red-600' : ''}">${rem}</td>
         `;
@@ -1357,21 +1381,34 @@
       window.print();
     }
 
-    // Save Patient Visit
+    // Helper: Read File as Base64 for Google Drive Upload
+    function readFileAsBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64String = reader.result.split(',')[1];
+          resolve(base64String);
+        };
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Save Patient Visit with Document Upload Handler
     async function savePatientRecord(e) {
       e.preventDefault();
       const btn = document.getElementById("savePatientBtn");
       btn.disabled = true;
-      btn.innerHTML = `<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span> Generating Prescription & Saving...`;
+      btn.innerHTML = `<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span> Processing & Uploading Files...`;
 
       const medRows = document.querySelectorAll("#medicinesContainer > div");
       let medicines = [];
       let medTotal = 0;
       medRows.forEach(r => {
-        const name = r.querySelector(".med-name") ? r.querySelector(".med-name").value.trim() : "";
-        const freq = r.querySelector(".med-freq") ? r.querySelector(".med-freq").value.trim() : "";
-        const dur = r.querySelector(".med-duration") ? r.querySelector(".med-duration").value.trim() : "";
-        const price = r.querySelector(".med-price") ? (Number(r.querySelector(".med-price").value) || 0) : 0;
+        const name = r.querySelector(".med-name").value.trim();
+        const freq = r.querySelector(".med-freq").value.trim();
+        const dur = r.querySelector(".med-duration").value.trim();
+        const price = Number(r.querySelector(".med-price").value) || 0;
         medTotal += price;
         if (name) medicines.push({ name, frequency: freq, duration: dur, price: price });
       });
@@ -1382,6 +1419,23 @@
       const netPayable = Math.max(0, gross - discount);
       const paid = Number(document.getElementById("fPaidAmount").value) || 0;
       const remaining = Math.max(0, netPayable - paid);
+
+      // Handle Attached Medical Report File
+      let reportFileData = null;
+      let reportFileName = null;
+      let reportFileType = null;
+
+      const fileInput = document.getElementById("patientReportFileInput");
+      if (fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        reportFileName = file.name;
+        reportFileType = file.type;
+        try {
+          reportFileData = await readFileAsBase64(file);
+        } catch (err) {
+          console.error("File reading error:", err);
+        }
+      }
 
       const payload = {
         action: "savePatient",
@@ -1412,7 +1466,10 @@
         netPayable: netPayable,
         paidAmount: paid,
         remainingAmount: remaining,
-        paymentMethod: document.getElementById("fMethod").value
+        paymentMethod: document.getElementById("fMethod").value,
+        reportFileData: reportFileData,
+        reportFileName: reportFileName,
+        reportFileType: reportFileType
       };
 
       try {
@@ -1424,7 +1481,7 @@
         const result = await res.json();
 
         if (result.status === "success") {
-          alert("Patient visit successfully saved!");
+          alert("Patient visit and attached reports saved successfully!");
           if (result.docUrl) {
             const printChoice = confirm("Do you want to open Prescription as PDF now?\n(Cancel for Google Doc)");
             if (printChoice && result.pdfUrl) {
@@ -1442,13 +1499,12 @@
       } catch (err) {
         alert("Failed to communicate with Google Drive/Sheet.");
       } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<i data-lucide="cloud-upload" class="w-4 h-4"></i><span>Save Visit & Generate Prescription</span>`;
+        btn.disabled = false
+        btn.innerHTML = `<i data-lucide="cloud-upload" class="w-4 h-4"></i><span>Save Visit & Upload Reports</span>`;
         lucide.createIcons();
       }
     }
 
-    // Admin Panel Actions
     function switchAdminSubTab(tab) {
       const secS = document.getElementById("subTabSettings");
       const secD = document.getElementById("subTabDoctors");
@@ -1491,17 +1547,13 @@
         adminEmail: document.getElementById("admEmail").value.trim(),
         logoUrl: document.getElementById("admLogoUrl").value.trim()
       };
-      try {
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain" },
-          body: JSON.stringify(payload)
-        });
-        alert("Clinic settings updated!");
-        loadInitialData();
-      } catch (err) {
-        alert("Failed to save settings.");
-      }
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(payload)
+      });
+      alert("Clinic settings updated!");
+      loadInitialData();
     }
 
     async function loadDoctors() {
@@ -1548,33 +1600,25 @@
         username: document.getElementById("docUser").value.trim(),
         password: document.getElementById("docPass").value.trim()
       };
-      try {
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain" },
-          body: JSON.stringify(payload)
-        });
-        alert("Doctor credentials saved!");
-        document.getElementById("doctorMgmtForm").reset();
-        document.getElementById("btnSaveDoctor").innerText = "Save / Update Doctor";
-        loadDoctors();
-      } catch (err) {
-        alert("Failed to save doctor credentials.");
-      }
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(payload)
+      });
+      alert("Doctor credentials saved!");
+      document.getElementById("doctorMgmtForm").reset();
+      document.getElementById("btnSaveDoctor").innerText = "Save / Update Doctor";
+      loadDoctors();
     }
 
     async function deleteDoctor(username) {
       if (!confirm(`Are you sure you want to remove access for ${username}?`)) return;
-      try {
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain" },
-          body: JSON.stringify({ action: "deleteDoctor", username: username })
-        });
-        loadDoctors();
-      } catch (err) {
-        alert("Failed to delete doctor.");
-      }
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({ action: "deleteDoctor", username: username })
+      });
+      loadDoctors();
     }
 
     function renderAdminPatientTable(list) {
@@ -1587,7 +1631,7 @@
       list.forEach(p => {
         const netPay = p.NetPayable ?? p.netPayable ?? p.Fee ?? 0;
         const paid = p.PaidAmount ?? p.paidAmount ?? p.Fee ?? 0;
-        const rem = p.RemainingAmount ?? p.remainingAmount ?? 0;
+        const reportUrl = p.AttachedReportURL || p.attachedReportUrl || "";
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -1597,7 +1641,9 @@
           <td class="p-3">${p.Gender || '-'} / ${p.Age || '-'} Y</td>
           <td class="p-3 text-slate-600">${p.Phone || '-'}</td>
           <td class="p-3"><span class="font-bold text-emerald-600">Rs ${paid}</span><span class="text-[10px] text-slate-400 block">Total: Rs ${netPay}</span></td>
-          <td class="p-3 font-bold ${Number(rem) > 0 ? 'text-rose-600' : 'text-slate-400'}">Rs ${rem}</td>
+          <td class="p-3">
+            ${reportUrl && reportUrl.startsWith("http") ? `<a href="${reportUrl}" target="_blank" class="px-2 py-1 bg-teal-50 text-teal-700 hover:bg-teal-100 rounded text-xs font-semibold">View File</a>` : '<span class="text-slate-400 text-xs">-</span>'}
+          </td>
           <td class="p-3 text-right space-x-1 whitespace-nowrap">
             ${p.DocURL ? `<a href="${p.DocURL}" target="_blank" class="px-2 py-1 bg-brand-50 text-brand-700 rounded text-xs font-semibold">Doc</a>` : ''}
             ${p.DocURL ? `<a href="${p.DocURL.replace('/edit', '/export?format=pdf')}" target="_blank" class="px-2 py-1 bg-red-50 text-red-600 rounded text-xs font-semibold">PDF</a>` : ''}
@@ -1606,7 +1652,6 @@
         `;
         tbody.appendChild(tr);
       });
-      lucide.createIcons();
     }
 
     function filterAdminPatientRecords() {
